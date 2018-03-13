@@ -96,7 +96,7 @@ else
         Set-ItemProperty -Path HKLM:SYSTEM\CurrentControlSet\Control\PriorityControl -Name Win32PrioritySeparation -Value 18
 
     # Disable TCP/IP / Large Send Offload 
-     Set-ItemProperty -Path HKLM:SYSTEM\CurrentC
+        Set-ItemProperty -Path HKLM:SYSTEM\CurrentControlSet\Services\Tcpip\Parameters -Name EnableTCPChimney -Type DWORD -Value 0
 
 "Configuring Power Settings..."
     # POWER SETTINGS
