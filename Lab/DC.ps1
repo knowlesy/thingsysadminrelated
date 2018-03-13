@@ -50,17 +50,14 @@ $userpw = ConvertTo-SecureString “Password1234” -AsPlainText -Force
 
 function get-sysinternals
 {
-$testgoogle = test-connection google.com -Quiet -Count 2
- if ( $testgoogle -eq "TRUE")
+ if ( (test-connection google.com -Quiet -Count 2) -eq "TRUE")
 { 
-    Write-Host Downloading Sysinternals;
+    Write-Host Connected to outside world.......Downloading Sysinternals;
 #https://gallery.technet.microsoft.com/scriptcenter/a6b10a18-c4e4-46cc-b710-4bd7fa606f95
 (New-Object Net.WebClient).DownloadFile('https://download.sysinternals.com/files/SysinternalsSuite.zip','c:\Support\BuildFiles\SysinternalsSuite.zip');(new-object -com shell.application).namespace('c:\Support\BuildFiles').CopyHere((new-object -com shell.application).namespace('c:\Support\BuildFiles\SysinternalsSuite.zip').Items(),16)
 }
 else
 {write-host Not Downloading Sysinternals}
-
-
 }
 
 
