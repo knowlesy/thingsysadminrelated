@@ -19,7 +19,8 @@ exit
 }
 
 #####################################################################
-
+#Config Variables
+#####################################################################
 $domainname = 'testlab.intra'
 $domainnetbiosname = 'testlab'
 $sethostanme = '2012-DC'
@@ -35,7 +36,8 @@ $dhcpstart = '192.168.1.100'
 $dhcpend = '192.168.1.200'
 $dhcpsnm = '255.255.255.0'
 $userpw = ConvertTo-SecureString “Password1234” -AsPlainText -Force
-
+#####################################################################
+#/End Config Variables
 #####################################################################
 
 "This script is running with elevated admin privileges"
@@ -51,18 +53,21 @@ $userpw = ConvertTo-SecureString “Password1234” -AsPlainText -Force
     mkdir c:\Support\BuildFiles
 
     #download sysinternals
-    #https://gallery.technet.microsoft.com/scriptcenter/Collect-a-Yes-or-No-cd8d51ff
-    Write-host "Would you like to download sysinternals (Default is No)" -ForegroundColor Yellow 
-    $Readhost = Read-Host " ( y / n ) " 
-    Switch ($ReadHost) 
-     { 
-         #https://gallery.technet.microsoft.com/scriptcenter/a6b10a18-c4e4-46cc-b710-4bd7fa606f95
-       Y {Write-host "Yes, Downloadloading"; (New-Object Net.WebClient).DownloadFile('https://download.sysinternals.com/files/SysinternalsSuite.zip','c:\Support\BuildFiles\SysinternalsSuite.zip');(new-object -com shell.application).namespace('c:\Support\BuildFiles').CopyHere((new-object -com shell.application).namespace('c:\Support\BuildFiles\SysinternalsSuite.zip').Items(),16)} 
-       N {Write-Host "Not downloading"; } 
-       Default {Write-Host "Default, Skip"; } 
-     } 
-    
+    function get-sysinternals
+{
+$testgoogle = test-connection google.com -Quiet -Count 2
+ if ( $testgoogle -eq "TRUE")
+{ 
+    Write-Host Downloading Sysinternals;
+#https://gallery.technet.microsoft.com/scriptcenter/a6b10a18-c4e4-46cc-b710-4bd7fa606f95
+(New-Object Net.WebClient).DownloadFile('https://download.sysinternals.com/files/SysinternalsSuite.zip','c:\Support\BuildFiles\SysinternalsSuite.zip');(new-object -com shell.application).namespace('c:\Support\BuildFiles').CopyHere((new-object -com shell.application).namespace('c:\Support\BuildFiles\SysinternalsSuite.zip').Items(),16)
+}
+else
+{write-host Not Downloading Sysinternals}
 
+
+}
+    
     # Disable Server manager at startup
         New-ItemProperty -Path HKCU:\Software\Microsoft\ServerManager -Name DoNotOpenServerManagerAtLogon -PropertyType DWORD -Value "0x1" –Force
     # Disable DEP
