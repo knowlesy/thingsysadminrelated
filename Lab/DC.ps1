@@ -36,6 +36,7 @@ $dhcpstart = '192.168.1.100'
 $dhcpend = '192.168.1.200'
 $dhcpsnm = '255.255.255.0'
 $userpw = ConvertTo-SecureString “Password1234” -AsPlainText -Force
+$Timezone = 'GMT Standard Time'
 #####################################################################
 #/End Config Variables
 #####################################################################
@@ -50,7 +51,7 @@ $userpw = ConvertTo-SecureString “Password1234” -AsPlainText -Force
 
 function get-sysinternals
 {
- if ( (test-connection google.com -Quiet -Count 2) -eq "TRUE")
+ if (test-connection google.com -Quiet -Count 2)
 { 
     Write-Host Connected to outside world.......Downloading Sysinternals;
 #https://gallery.technet.microsoft.com/scriptcenter/a6b10a18-c4e4-46cc-b710-4bd7fa606f95
@@ -142,13 +143,15 @@ function Set-PageFile {
     #download sysinternals
     get-sysinternals
 
+    # Set Timezone
+    TZUTIL /s "$Timezone"
     
     # Disable Server manager at startup
         New-ItemProperty -Path HKCU:\Software\Microsoft\ServerManager -Name DoNotOpenServerManagerAtLogon -PropertyType DWORD -Value "0x1" –Force
     # Disable DEP
         bcdedit /set nx AlwaysOff
     # Disable Indexing on all drives
-        gwmi Win32_Volume -Filter "IndexingEnabled=$true" | swmi -Arguments @{IndexingEnabled=$false}
+        Get-WmiObject Win32_Volume -Filter "IndexingEnabled=$true" | Set-WMIInstance -Arguments @{IndexingEnabled=$false}
     # Enable RDP for Admins
 	    cscript C:\Windows\System32\Scregedit.wsf /ar 0
         cscript C:\Windows\System32\Scregedit.wsf /cs 0
