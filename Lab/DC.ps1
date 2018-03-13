@@ -1,19 +1,3 @@
-$domainname = 'testlab.intra'
-$domainnetbiosname = 'testlab'
-$sethostanme = '2012-DC'
-$SafeModeAdministratorPasswordText = ‘Password12345’
-$staticip = '192.168.1.2'
-$subnetmaskprefix = '24'
-$ipgateway = '192.168.1.1'
-$dns1 = '127.0.0.1'
-$dns2 = '192.168.1.2'
-$pagefile = '2048'
-$dhcpscope = '192.168.1.0'
-$dhcpstart = '192.168.1.100'
-$dhcpend = '192.168.1.200'
-$dhcpsnm = '255.255.255.0'
-$userpw = ConvertTo-SecureString “Password1234” -AsPlainText -Force
-
 $myWindowsID=[System.Security.Principal.WindowsIdentity]::GetCurrent()
 $myWindowsPrincipal=new-object System.Security.Principal.WindowsPrincipal($myWindowsID)# Get the security principal for the Administrator role
 $adminRole=[System.Security.Principal.WindowsBuiltInRole]::Administrator# Check to see if we are currently running “as Administrator”
@@ -33,6 +17,26 @@ $newProcess.Verb = “runas”;# Start the new process
 [System.Diagnostics.Process]::Start($newProcess);# Exit from the current, unelevated, process
 exit
 }
+
+#####################################################################
+
+$domainname = 'testlab.intra'
+$domainnetbiosname = 'testlab'
+$sethostanme = '2012-DC'
+$SafeModeAdministratorPasswordText = ‘Password12345’
+$staticip = '192.168.1.2'
+$subnetmaskprefix = '24'
+$ipgateway = '192.168.1.1'
+$dns1 = '127.0.0.1'
+$dns2 = '192.168.1.2'
+$pagefile = '2048'
+$dhcpscope = '192.168.1.0'
+$dhcpstart = '192.168.1.100'
+$dhcpend = '192.168.1.200'
+$dhcpsnm = '255.255.255.0'
+$userpw = ConvertTo-SecureString “Password1234” -AsPlainText -Force
+
+#####################################################################
 
 "This script is running with elevated admin privileges"
 " "
@@ -64,7 +68,7 @@ exit
     # Disable DEP
         bcdedit /set nx AlwaysOff
     # Disable Indexing on all drives
-        gwmi Win32_Volume -Filter "IndexingEnabled=$true" | swmi -Arguments @{IndexingEnabled=$false} | out-file c:\#Support\CustomizeReport.txt -append
+        gwmi Win32_Volume -Filter "IndexingEnabled=$true" | swmi -Arguments @{IndexingEnabled=$false}
     # Enable RDP for Admins
 	    cscript C:\Windows\System32\Scregedit.wsf /ar 0
         cscript C:\Windows\System32\Scregedit.wsf /cs 0
