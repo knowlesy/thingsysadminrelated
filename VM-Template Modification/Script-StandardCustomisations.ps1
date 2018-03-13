@@ -1,19 +1,19 @@
 $myWindowsID=[System.Security.Principal.WindowsIdentity]::GetCurrent()
 $myWindowsPrincipal=new-object System.Security.Principal.WindowsPrincipal($myWindowsID)# Get the security principal for the Administrator role
-$adminRole=[System.Security.Principal.WindowsBuiltInRole]::Administrator# Check to see if we are currently running ìas Administratorî
+$adminRole=[System.Security.Principal.WindowsBuiltInRole]::Administrator# Check to see if we are currently running ‚Äúas Administrator‚Äù
 if ($myWindowsPrincipal.IsInRole($adminRole))
 {
-# We are running ìas Administratorî ñ so change the title and background colour to indicate this
-$Host.UI.RawUI.WindowTitle = $myInvocation.MyCommand.Definition + ì(Elevated)î
-$Host.UI.RawUI.BackgroundColor = ìDarkBlueî
+# We are running ‚Äúas Administrator‚Äù ‚Äì so change the title and background colour to indicate this
+$Host.UI.RawUI.WindowTitle = $myInvocation.MyCommand.Definition + ‚Äú(Elevated)‚Äù
+$Host.UI.RawUI.BackgroundColor = ‚ÄúDarkBlue‚Äù
 clear-host
 }
 else
 {
-# We are not running ìas Administratorî ñ so relaunch as administrator# Create a new process object that starts PowerShell
-$newProcess = new-object System.Diagnostics.ProcessStartInfo ìPowerShellî;# Specify the current script path and name as a parameter
+# We are not running ‚Äúas Administrator‚Äù ‚Äì so relaunch as administrator# Create a new process object that starts PowerShell
+$newProcess = new-object System.Diagnostics.ProcessStartInfo ‚ÄúPowerShell‚Äù;# Specify the current script path and name as a parameter
 $newProcess.Arguments = $myInvocation.MyCommand.Definition;# Indicate that the process should be elevated
-$newProcess.Verb = ìrunasî;# Start the new process
+$newProcess.Verb = ‚Äúrunas‚Äù;# Start the new process
 [System.Diagnostics.Process]::Start($newProcess);# Exit from the current, unelevated, process
 exit
 }
@@ -36,7 +36,7 @@ exit
 	# fsutil.exe behavior set disablelastaccess 1
 	
 	# Disable Indexing on all drives
-	gwmi Win32_Volume -Filter "IndexingEnabled=$true" | swmi -Arguments @{IndexingEnabled=$false} | out-file c:\Technip\CustomizeReport.txt -append
+	gwmi Win32_Volume -Filter "IndexingEnabled=$true" | swmi -Arguments @{IndexingEnabled=$false} | out-file c:\#Support\CustomizeReport.txt -append
 	
 	# Change DVD drive letter
 	# gwmi Win32_Volume -Filter "DriveType = '5'" | swmi -Arguments @{DriveLetter = 'Z:'} 
@@ -131,7 +131,7 @@ exit
 
 "Enabling Administration Features..."
 #Configures the Admin features
-Install-WindowsFeature ñConfigurationFilePath c:\Support\Scripts\Generic\DeploymentConfigTemplate.xml
+Install-WindowsFeature ‚ÄìConfigurationFilePath c:\Support\Scripts\Generic\DeploymentConfigTemplate.xml
 
 #Alternative Method for feature install
 #$ServerFeatures = Import-Clixml c:\Support\Scripts\Generic\DeploymentConfigTemplate.xml
