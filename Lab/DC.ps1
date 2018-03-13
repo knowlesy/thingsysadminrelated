@@ -64,7 +64,7 @@ exit
     # Disable DEP
         bcdedit /set nx AlwaysOff
     # Disable Indexing on all drives
-        gwmi Win32_Volume -Filter "IndexingEnabled=$true" | swmi -Arguments @{IndexingEnabled=$false} | out-file c:\Technip\CustomizeReport.txt -append
+        gwmi Win32_Volume -Filter "IndexingEnabled=$true" | swmi -Arguments @{IndexingEnabled=$false} | out-file c:\#Support\CustomizeReport.txt -append
     # Enable RDP for Admins
 	    cscript C:\Windows\System32\Scregedit.wsf /ar 0
         cscript C:\Windows\System32\Scregedit.wsf /cs 0
