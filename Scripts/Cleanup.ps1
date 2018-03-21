@@ -9,6 +9,7 @@
 #https://gallery.technet.microsoft.com/scriptcenter/Disk-Cleanup-Using-98ad13bc
 #https://ss64.com/nt/cleanmgr.html
 #https://blogs.technet.microsoft.com/heyscriptingguy/2015/04/02/update-or-add-registry-key-value-with-powershell/
+#https://blogs.technet.microsoft.com/heyscriptingguy/2013/03/04/use-powershell-to-find-detailed-windows-profile-information/
 ######################################################################################
 
 ###########Variables###############
@@ -139,6 +140,11 @@ write-output "Switching off Hibernation"
 powercfg -h off
 write-host "switching off hbernation"
 
+################
+#https://blogs.technet.microsoft.com/heyscriptingguy/2013/03/04/use-powershell-to-find-detailed-windows-profile-information/
+#Remove old profiles
+#Section coming
+################
  
 #Windows Temp Folder
 Write-Host "Deletes the contents of the Windows Temp folder. "
