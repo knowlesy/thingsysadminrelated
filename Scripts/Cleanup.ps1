@@ -167,15 +167,15 @@ Write-Host "Deletes the contents of windows error reporting. "
 date-time | write-output >> $Location
 write-Output "Deletes the contents of windows error reporting." >> $Location
 Write-Output "##################################################################################################################" >> $Location
-Get-ChildItem "C:\ProgramData\Microsoft\Windows\WER*" -Recurse -Force -Verbose -ErrorAction SilentlyContinue | write-output >> $Location
+Get-ChildItem "C:\ProgramData\Microsoft\Windows\WER\*" -Recurse -Force -Verbose -ErrorAction SilentlyContinue | write-output >> $Location
 Write-Output "##################################################################################################################" >> $Location
-Get-ChildItem "C:\ProgramData\Microsoft\Windows\WER*" -Recurse -Force -Verbose -ErrorAction SilentlyContinue | remove-item -force -Verbose -recurse -ErrorAction SilentlyContinue 
+Get-ChildItem "C:\ProgramData\Microsoft\Windows\WER\*" -Recurse -Force -Verbose -ErrorAction SilentlyContinue | remove-item -force -Verbose -recurse -ErrorAction SilentlyContinue 
 Write-Host "The Contents of error reporting have been removed successfully! "
 
 #Switchoff Hibernation
 write-output "Switching off Hibernation"
 powercfg -h off
-write-host "switching off hbernation"
+write-host "Switched off hbernation"
 
 #Delete Old User Profiles which havent logged in +XXX Days
 write-Output "Remove Old User Profiles" >> $Location
@@ -187,8 +187,8 @@ $filteredolderprofiles = $olderprofiles | select -expandproperty localpath
 foreach ($filter in $filteredolderprofiles)
 {
 $string = ($filter | Out-String).Trim()
-Get-ChildItem –Path $string -Recurse | write-out >> $location
-Get-ChildItem –Path $string -Recurse | Remove-Item
+Get-ChildItem –Path $string -Recurse | write-output >> $location
+Get-ChildItem –Path $string -Recurse | Remove-Item -recurse
 
 }
 Write-Output "##################################################################################################################" >> $Location
@@ -239,8 +239,8 @@ Write-Host "The Recycling Bin has been emptied! "
 if (test-path $sep)
 {
 Write-Host "Clearing Sep"
-Get-ChildItem –Path $sep -Recurse | Where-Object {($_.LastWriteTime -lt (Get-Date).AddDays($Daysback))} | write-output >> $Location
-Get-ChildItem –Path $sep -Recurse | Where-Object {($_.LastWriteTime -lt (Get-Date).AddDays($Daysback))} | Remove-Item
+Get-ChildItem –Path $sep -Recurse | Where-Object {($_.LastWriteTime -lt (Get-Date).AddDays($Daysback))} | Where-object {$_.localpath -like "C:\ProgramData\Symantec\Symantec Endpoint Protection\CurrentVersion\Data\Definitions\VirusDefs\20"} | write-output >> $Location
+Get-ChildItem –Path $sep -Recurse | Where-Object {($_.LastWriteTime -lt (Get-Date).AddDays($Daysback))} | Where-object {$_.localpath -like "C:\ProgramData\Symantec\Symantec Endpoint Protection\CurrentVersion\Data\Definitions\VirusDefs\20"} | Remove-Item
 }
 
 
@@ -394,13 +394,13 @@ CLEANMGR /sagerun:12 /d c:\
 Write-Host "###########################################################"
 Write-Host "###########################################################"
 Write-Host "                                                           "
-Write-Host "Cleanup Manager Running System will be paused for 5 minutes"
+Write-Host "    Cleanup Manager Running System will be paused          "
 Write-Host "                   Do not Close this box!                  "
 Write-Host "           Reg backup is in C:\Temp\Clnmgr.reg             "
 Write-Host "                                                           "
+Write-Host "###########################################################"22
 Write-Host "###########################################################"
-Write-Host "###########################################################"
-start-sleep -Seconds 300
+wait-process -name cleanmgr
  
 # Starts the Windows Update Service 
 Get-Service -Name wuauserv | Start-Service -Verbose 
@@ -423,4 +423,5 @@ Write-Host $size
 
 
 Write-Host "Completed Successfully! "
+Write-Host "Logs are in C:\Logs\ "
 Write-Host "You Should now restart your machine "
