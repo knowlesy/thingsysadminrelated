@@ -1,5 +1,6 @@
 
-###########What It Does###############
+###########What It Does / For###############
+#Intention is to be ran as an admin for a local user 
 #Disables Hibernation
 #Cleans C:\Windows\SoftwareDistribution\
 #Cleans Old User Profiles 
@@ -15,6 +16,8 @@
 #Cleans C:\Temp
 #Cleans Reg User Temp Keys
 #Runs Clmgr
+#To be Ran on Win 7/8/8.1/10
+#Script Execution will need to be bypassed
 ###################################
 
 
@@ -33,10 +36,6 @@
 #https://blogs.technet.microsoft.com/heyscriptingguy/2013/03/04/use-powershell-to-find-detailed-windows-profile-information/
 #https://gallery.technet.microsoft.com/Script-to-delete-bak-2ebd222f
 ######################################################################################
-
-
-
-
 
 
 ###########Variables###############
@@ -136,6 +135,20 @@ exit
  #Test
  #Write-Host "test"
 
+If (test-path c:\users\$user\)
+{
+write-output $user >> $Location
+Write-Output "User confirmed " >> $Location
+Write-Host "User Confirmed"
+}
+Else
+{
+write-output $user >> $Location
+Write-Output "does not exist" >> $Location
+Write-Host "User Does Not Exist....Goodbye"
+Start-Sleep -Seconds 5
+exit
+}
 
 #Size
 $size = Get-ChildItem C:\Users\$user -Include *.iso, *.vhd -Recurse -ErrorAction SilentlyContinue | Sort Length -Descending |  Select-Object Name,@{Name="Size (GB)";Expression={ "{0:N2}" -f ($_.Length / 1GB) }}, Directory | Format-Table -AutoSize | Out-String 
