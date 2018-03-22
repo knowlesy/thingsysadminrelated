@@ -13,12 +13,14 @@
 #Cleans Chrome (user specified) 
 #Cleans IE (user specified more aggressive) 
 #Cleans C:\Temp
+#Cleans Reg User Temp Keys
 #Runs Clmgr
 ###################################
 
 
 ######################################################################################
 #References
+#This is based off a combination of scripts from a variety of locations
 #http://winpowershell.blogspot.co.uk/2010/01/powershell-choice-yesno-user-input.html
 #https://gallery.technet.microsoft.com/scriptcenter/Clean-up-your-C-Drive-bc7bb3ed
 #https://github.com/lemtek/Powershell/blob/master/Clear_Browser_Caches
@@ -29,6 +31,7 @@
 #https://ss64.com/nt/cleanmgr.html
 #https://blogs.technet.microsoft.com/heyscriptingguy/2015/04/02/update-or-add-registry-key-value-with-powershell/
 #https://blogs.technet.microsoft.com/heyscriptingguy/2013/03/04/use-powershell-to-find-detailed-windows-profile-information/
+#https://gallery.technet.microsoft.com/Script-to-delete-bak-2ebd222f
 ######################################################################################
 
 
@@ -301,19 +304,87 @@ If (test-path $Tempfolder)
     Write-Output "##################################################################################################################" >> $Location
     Get-ChildItem "C:\Temp\*" -Recurse -Force -Verbose -ErrorAction SilentlyContinue | remove-item -force -Verbose -recurse -ErrorAction SilentlyContinue 
     Write-Host "c:\Temp cleared "
+    Write-Output "Registry Exports" >> $Location
     Reg  export "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches" C:\Temp\clnmgr.reg
-    Write-Output "Clnmg Reg Key backed up" >> $Location
+    Reg  export "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList" C:\Temp\Profile.reg
+    Write-Output "Clnmg Reg & Profile Key backed up" >> $Location
 }
 Else
 {
     mkdir $Tempfolder
     date-time | Write-Output >> $Location
     Write-Output "Temp Folder Created" >> $Location
+    Write-Output "Registry Exports" >> $Location
     Reg  export "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches" C:\Temp\clnmgr.reg
-    Write-Output "Clnmg Reg Key backed up" >> $Location
+    Reg  export "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList" C:\Temp\Profile.reg
+    Write-Output "Clnmg Reg & Profile Key backed up" >> $Location
 }
 
 
+#User Bak 
+
+
+Write-Host "Searching for Temp Profiles in Reg"
+    date-time | write-output >> $Location
+    write-Output "Searching for Temp Profiles in Reg" >> $Location
+    Write-Output "##################################################################################################################" >> $Location
+
+	##connect with registry of remote machine
+	$baseKey = Get-Item -Path Registry::HKEY_LOCAL_MACHINE
+
+	##set registry path
+	$key = $baseKey.OpenSubKey("Software\Microsoft\Windows NT\CurrentVersion\ProfileList",$true)
+
+	## get all profile name
+	$profilereg = $key.GetSubKeyNames()
+	$profileregcount = $profilereg.count
+
+	while($profileregcount -ne 0)
+	{
+		## check for bak profiles
+
+		if($profilereg[$profileregcount-1] -like "*.bak")
+		{
+			$bakname = $profilereg[$profileregcount-1]
+
+			$baknamefinal = $bakname.Split(".")[0]
+
+			## Delete bak profile
+			$key.DeleteSubKeyTree("$bakname")
+
+
+			##connect with profileGuid
+			$keyGuid = $baseKey.OpenSubKey("Software\Microsoft\Windows NT\CurrentVersion\ProfileGuid",$true)
+
+			## get all profile Guid
+			$Guidreg = $keyGuid.GetSubKeyNames()
+			$Guidregcount = $Guidreg.count
+		
+			while($Guidregcount -ne 0)
+			{
+				$bakname1 = $Guidreg[$Guidregcount-1]
+		
+				$keyGuidTest = $baseKey.OpenSubKey("Software\Microsoft\Windows NT\CurrentVersion\ProfileGuid\$bakname1",$true)
+				$KeyGuidSidValue = $keyGuidTest.GetValue("sidstring")
+				$KeyGuidSidValue
+			
+				if($baknamefinal -eq $KeyGuidSidValue)
+				{
+					## Delete Guid profile
+					$keyGuid.DeleteSubKeyTree("$bakname1") >> $Location
+				}
+				$Guidregcount = $Guidregcount-1
+			}
+
+
+		}
+		$profileregcount = $profileregcount-1
+	}
+
+    Write-Host "Completed searching for Temp Profiles in Reg"
+    date-time | write-output >> $Location
+    write-Output "Completed searching for Temp Profiles in Reg" >> $Location
+    Write-Output "##################################################################################################################" >> $Location
 
 #ClnMgr runs profile 12 C: only
 Execute-Process -FilePath “reg.exe” -Parameters “import .\clnmgr.reg” -PassThru
@@ -352,3 +423,4 @@ Write-Host $size
 
 
 Write-Host "Completed Successfully! "
+Write-Host "You Should now restart your machine "
