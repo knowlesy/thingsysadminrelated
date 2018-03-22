@@ -1,3 +1,22 @@
+
+###########What It Does###############
+#Disables Hibernation
+#Cleans C:\Windows\SoftwareDistribution\
+#Cleans Old User Profiles 
+#Cleans C:\Windows\Temp\
+#Cleans C:\ProgramData\Microsoft\Windows\WER
+#Cleans C:\users\$user\AppData\Local\Temp\*
+#Cleans C:\users\$user\AppData\Local\Microsoft\Windows\Temporary Internet Files
+#Cleans Recycle Bin  
+#Cleans SEP
+#Cleans Firefox (user specified) 
+#Cleans Chrome (user specified) 
+#Cleans IE (user specified more aggressive) 
+#Cleans C:\Temp
+#Runs Clmgr
+###################################
+
+
 ######################################################################################
 #References
 #http://winpowershell.blogspot.co.uk/2010/01/powershell-choice-yesno-user-input.html
@@ -12,6 +31,11 @@
 #https://blogs.technet.microsoft.com/heyscriptingguy/2013/03/04/use-powershell-to-find-detailed-windows-profile-information/
 ######################################################################################
 
+
+
+
+
+
 ###########Variables###############
 $LogsLocation = "C:\Logs\"
 $date = get-date -UFormat %y"-"%m"-"%d"-"%T  | foreach {$_ -replace ":", ""}
@@ -21,6 +45,7 @@ $RecBin = $Shell.Namespace(0xA)
 $sep = "C:\ProgramData\Symantec\Symantec Endpoint Protection\CurrentVersion\Data\Definitions\VirusDefs"
 $Daysback = "-90"
 $Tempfolder = "C:\Temp"
+$DeleteDaysback = "-180"
 ##########################
 
 ###########Functions###############
@@ -60,7 +85,7 @@ start-sleep -Seconds 10
 
 clear-host
 
-Write-Host "##########################################################"
+Write-Host "####This script will take up to 30 minutes or more!#######"
 Write-Host "##########################################################"
 Write-Host "###########  Logs are located in $LogsLocation ###########"
 Write-Host "##########################################################"
@@ -134,17 +159,38 @@ Write-Output "##################################################################
 Get-ChildItem "C:\Windows\SoftwareDistribution\*" -Recurse -Force -Verbose -ErrorAction SilentlyContinue | remove-item -force -Verbose -recurse -ErrorAction SilentlyContinue 
 Write-Host "The Contents of Windows SoftwareDistribution have been removed successfully! "
 
+#windows error reporting
+Write-Host "Deletes the contents of windows error reporting. "
+date-time | write-output >> $Location
+write-Output "Deletes the contents of windows error reporting." >> $Location
+Write-Output "##################################################################################################################" >> $Location
+Get-ChildItem "C:\ProgramData\Microsoft\Windows\WER*" -Recurse -Force -Verbose -ErrorAction SilentlyContinue | write-output >> $Location
+Write-Output "##################################################################################################################" >> $Location
+Get-ChildItem "C:\ProgramData\Microsoft\Windows\WER*" -Recurse -Force -Verbose -ErrorAction SilentlyContinue | remove-item -force -Verbose -recurse -ErrorAction SilentlyContinue 
+Write-Host "The Contents of error reporting have been removed successfully! "
 
 #Switchoff Hibernation
 write-output "Switching off Hibernation"
 powercfg -h off
 write-host "switching off hbernation"
 
-################
-#https://blogs.technet.microsoft.com/heyscriptingguy/2013/03/04/use-powershell-to-find-detailed-windows-profile-information/
-#Remove old profiles
-#Section coming
-################
+#Delete Old User Profiles which havent logged in +XXX Days
+write-Output "Remove Old User Profiles" >> $Location
+Write-Output "##################################################################################################################" >> $Location
+write-Output "Usernames to be Deleted" >> $Location
+get-ciminstance win32_userprofile | where-object {$_.localpath -like "C:\Users\*"} | Where-object {$_.localpath -ne "C:\Users\defaultuser0"} | ? lastusetime | select lastusetime, localpath | Where-Object {($_.lastusetime -lt (Get-Date).AddDays($DeleteDaysback))} | Write-Output >> $location
+$olderprofiles = get-ciminstance win32_userprofile | where-object {$_.localpath -like "C:\Users\*"} | Where-object {$_.localpath -ne "C:\Users\defaultuser0"} | ? lastusetime | select lastusetime, localpath | Where-Object {($_.lastusetime -lt (Get-Date).AddDays($DeleteDaysback))}
+$filteredolderprofiles = $olderprofiles | select -expandproperty localpath 
+foreach ($filter in $filteredolderprofiles)
+{
+$string = ($filter | Out-String).Trim()
+Get-ChildItem –Path $string -Recurse | write-out >> $location
+Get-ChildItem –Path $string -Recurse | Remove-Item
+
+}
+Write-Output "##################################################################################################################" >> $Location
+write-Output "Profiles Removed" >> $Location
+
  
 #Windows Temp Folder
 Write-Host "Deletes the contents of the Windows Temp folder. "
@@ -187,10 +233,12 @@ $RecBin.Items() | %{Remove-Item $_.Path -Recurse -Confirm:$false}
 Write-Host "The Recycling Bin has been emptied! "
 
 #SEP
+if (test-path $sep)
+{
 Write-Host "Clearing Sep"
 Get-ChildItem –Path $sep -Recurse | Where-Object {($_.LastWriteTime -lt (Get-Date).AddDays($Daysback))} | write-output >> $Location
 Get-ChildItem –Path $sep -Recurse | Where-Object {($_.LastWriteTime -lt (Get-Date).AddDays($Daysback))} | Remove-Item
-
+}
 
 
 #Firefox
