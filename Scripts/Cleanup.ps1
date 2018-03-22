@@ -200,9 +200,8 @@ $filteredolderprofiles = $olderprofiles | select -expandproperty localpath
 foreach ($filter in $filteredolderprofiles)
 {
 $string = ($filter | Out-String).Trim()
-Get-ChildItem –Path $string -Recurse | write-output >> $location
-Get-ChildItem –Path $string -Recurse | Remove-Item -recurse
-
+Get-ChildItem –Path $string -Recurse  -Force -ErrorAction SilentlyContinue | write-output >> $location
+Get-ChildItem –Path $string -Recurse  -Force -ErrorAction SilentlyContinue | Remove-Item -recurse -Verbose -recurse -ErrorAction SilentlyContinue
 }
 Write-Output "##################################################################################################################" >> $Location
 write-Output "Profiles Removed" >> $Location
@@ -252,8 +251,8 @@ Write-Host "The Recycling Bin has been emptied! "
 if (test-path $sep)
 {
 Write-Host "Clearing Sep"
-Get-ChildItem –Path $sep -Recurse | Where-Object {($_.LastWriteTime -lt (Get-Date).AddDays($Daysback))} | Where-object {$_.localpath -like "C:\ProgramData\Symantec\Symantec Endpoint Protection\CurrentVersion\Data\Definitions\VirusDefs\20"} | write-output >> $Location
-Get-ChildItem –Path $sep -Recurse | Where-Object {($_.LastWriteTime -lt (Get-Date).AddDays($Daysback))} | Where-object {$_.localpath -like "C:\ProgramData\Symantec\Symantec Endpoint Protection\CurrentVersion\Data\Definitions\VirusDefs\20"} | Remove-Item
+Get-ChildItem –Path $sep -Recurse  -Force -ErrorAction SilentlyContinue | Where-Object {($_.LastWriteTime -lt (Get-Date).AddDays($Daysback))} | Where-object {$_.localpath -like "C:\ProgramData\Symantec\Symantec Endpoint Protection\CurrentVersion\Data\Definitions\VirusDefs\20"} | write-output >> $Location
+Get-ChildItem –Path $sep -Recurse  -Force -ErrorAction SilentlyContinue | Where-Object {($_.LastWriteTime -lt (Get-Date).AddDays($Daysback))} | Where-object {$_.localpath -like "C:\ProgramData\Symantec\Symantec Endpoint Protection\CurrentVersion\Data\Definitions\VirusDefs\20"} | Remove-Item -Force -ErrorAction SilentlyContinue 
 }
 
 
