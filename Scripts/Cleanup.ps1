@@ -15,6 +15,7 @@
 #Cleans IE (user specified more aggressive) 
 #Cleans C:\Temp
 #Cleans Reg User Temp Keys
+#Cleans SCCM Cache
 #Runs Clmgr
 #To be Ran on Win 7/8/8.1/10
 #Script Execution will need to be bypassed
@@ -400,6 +401,7 @@ Write-Host "Searching for Temp Profiles in Reg"
 
 #
 #https://gallery.technet.microsoft.com/scriptcenter/Deleting-the-SCCM-Cache-da03e4c7
+#https://social.technet.microsoft.com/wiki/contents/articles/31380.increase-sccm-client-cache-size.aspx
 #
 
 #ClnMgr runs profile 12 C: only
