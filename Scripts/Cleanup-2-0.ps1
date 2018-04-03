@@ -35,6 +35,9 @@
 #https://blogs.technet.microsoft.com/heyscriptingguy/2015/04/02/update-or-add-registry-key-value-with-powershell/
 #https://blogs.technet.microsoft.com/heyscriptingguy/2013/03/04/use-powershell-to-find-detailed-windows-profile-information/
 #https://gallery.technet.microsoft.com/Script-to-delete-bak-2ebd222f
+#https://gallery.technet.microsoft.com/scriptcenter/Deleting-the-SCCM-Cache-da03e4c7
+#https://social.technet.microsoft.com/wiki/contents/articles/31380.increase-sccm-client-cache-size.aspx
+#https://gallery.technet.microsoft.com/Clean-the-SCCM-configMrg-b72f0b96
 ######################################################################################
 
 
@@ -49,6 +52,7 @@ $Daysback = "-90"
 $Tempfolder = "C:\Temp"
 $DeleteDaysback = "-180"
 $Domino2 = "$user\AppData\Local\Lotus\Notes\Data\workspace\logs"
+$sccmCache = '51200'
 ##########################
 
 ###########Functions###############
@@ -181,6 +185,37 @@ Write-Host "Clearing Sep"
 Get-ChildItem –Path $sep -Recurse  -Force -ErrorAction SilentlyContinue | Where-Object {($_.LastWriteTime -lt (Get-Date).AddDays($Daysback))} | Where-object {$_.localpath -like "C:\ProgramData\Symantec\Symantec Endpoint Protection\CurrentVersion\Data\Definitions\VirusDefs\20"} | write-output >> $Location
 Get-ChildItem –Path $sep -Recurse  -Force -ErrorAction SilentlyContinue | Where-Object {($_.LastWriteTime -lt (Get-Date).AddDays($Daysback))} | Where-object {$_.localpath -like "C:\ProgramData\Symantec\Symantec Endpoint Protection\CurrentVersion\Data\Definitions\VirusDefs\20"} | Remove-Item -Force -ErrorAction SilentlyContinue 
 }
+
+#SCCM Cache Clearout
+$CMObject = new-object -com "UIResource.UIResourceMgr" #Create CM object 
+$cacheInfo = $CMObject.GetCacheInfo() # get CCM cache info
+$lastUsed = 30  # laste use of folder
+$objects = $cacheinfo.GetCacheElements() | select-object location , LastReferenceTime, ContentSize
+
+$StartDate=(GET-DATE)
+
+$i=0
+
+out-file -append  -filepath C:\Logs\cacheremoval.log "Clean CccmCache"  # write all things on log
+
+
+# delete all folder unused on ccm cache
+foreach ( $item in $objects )
+{
+   
+  $diffDate = $StartDate - $item.LastReferenceTime
+
+   if ( $diffDate.Days -gt $lastUsed  )
+    {
+        $i++
+        remove-item -path $item.location
+       
+    }
+
+ }
+
+
+
 
 #Delete Old User Profiles which havent logged in +XXX Days
 #$DeleteDaysback = "-9000"
@@ -365,6 +400,12 @@ Get-Service -Name wuauserv | Start-Service -Verbose
 Write-Host "Starting Windows Update Service"
 Write-Output "Starting Windows Update Service" >> $Location
 
+#Sets SCCM Cache Size
+$Cache = Get-WmiObject -Namespace 'ROOT\CCM\SoftMgmtAgent' -Class CacheConfig
+$Cache.Size = $sccmCache
+$Cache.Put()
+Restart-Service -Name CcmExec
+
 #Grab how much free data 
 $After =  Get-WmiObject Win32_LogicalDisk | Where-Object { $_.DriveType -eq "3" } | Select-Object SystemName,@{ Name = "Drive" ; Expression = { ( $_.DeviceID ) } }, @{ Name = "Size (GB)" ; Expression = {"{0:N1}" -f( $_.Size / 1gb)}}, @{ Name = "FreeSpace (GB)" ; Expression = {"{0:N1}" -f( $_.Freespace / 1gb ) } }, @{ Name = "PercentFree" ; Expression = {"{0:P1}" -f( $_.FreeSpace / $_.Size ) } } | Format-Table -AutoSize | Out-String 
  
@@ -372,8 +413,10 @@ $After =  Get-WmiObject Win32_LogicalDisk | Where-Object { $_.DriveType -eq "3" 
 Hostname ; Get-Date | Select-Object DateTime 
 Write-Output "Before: $Before" >> $Location 
 Write-Output "After: $After" >> $Location
+Write-Output "SCCM Cache is now $sccmCache MB"
 Write-Host "Before: $Before"
 Write-Host "After: $After"
+Write-Host "SCCM Cache is now $sccmCache MB"
 Write-Host "Completed Successfully! "
 Write-Host "Logs are in C:\Logs\ "
 Write-Host "You Should now restart your machine "
