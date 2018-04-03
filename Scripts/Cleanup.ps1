@@ -398,6 +398,10 @@ Write-Host "Searching for Temp Profiles in Reg"
     write-Output "Completed searching for Temp Profiles in Reg" >> $Location
     Write-Output "##################################################################################################################" >> $Location
 
+#
+#https://gallery.technet.microsoft.com/scriptcenter/Deleting-the-SCCM-Cache-da03e4c7
+#
+
 #ClnMgr runs profile 12 C: only
 Execute-Process -FilePath “reg.exe” -Parameters “import .\clnmgr.reg” -PassThru
 Write-Output "Running Cleanup Manager" >> $Location
