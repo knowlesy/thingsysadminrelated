@@ -1,23 +1,30 @@
-###########What It Does / For###############
-#Intention is to be ran as an admin for a local user 
-#Disables Hibernation
-#Cleans C:\Windows\SoftwareDistribution\
-#Cleans Old User Profiles 
-#Cleans C:\Windows\Temp\
-#Cleans C:\ProgramData\Microsoft\Windows\WER
-#Cleans C:\users\$user\AppData\Local\Temp\*
-#Cleans C:\users\$user\AppData\Local\Microsoft\Windows\Temporary Internet Files
-#Cleans Recycle Bin  
-#Cleans SEP
-#Cleans Firefox (user specified) 
-#Cleans Chrome (user specified) 
-#Cleans IE (user specified more aggressive) 
-#Cleans C:\Temp
-#Cleans Reg User Temp Keys
-#Cleans SCCM Cache
-#Runs Clmgr
+###########What It's For###############
+#Intention is to be ran as an admin for a local users of a MAchine
 #To be Ran on Win 7/8/8.1/10
 #Script Execution will need to be bypassed
+#######################################
+
+###########What It Does############### 
+#Clears Event Log
+#Set Eventlog size to 20MB / 30days
+#Cleans C:\Windows\SoftwareDistribution\
+#Cleans Error Reporting C:\ProgramData\Microsoft\Windows\WER
+#Cleans C:\Windows\Temp\
+#Disables Hibernation
+#Cleans C:\Temp
+#Cleans SEP
+#SCCM Cache Cleanup
+#Remove Old User Profiles 
+#Clean Remaininguser Profiles
+##Cleans Firefox 
+##Cleans Chrome
+##Cleans IE
+##Cleans C:\users\$user\AppData\Local\Temp\*
+##Cleans Domino for DMP in logs
+#Cleans Reg User *.bak Temp Keys
+#Cleans Recycle Bin  
+#Runs Clmgr
+#Sets SCCM Cache Size
 ###################################
 
 
@@ -100,6 +107,15 @@ date-time | Write-Output >> $Location
 
 ##Getting Before Size
 Before = Get-WmiObject Win32_LogicalDisk | Where-Object { $_.DriveType -eq "3" } | Select-Object SystemName,@{ Name = "Drive" ; Expression = { ( $_.DeviceID ) } },@{ Name = "Size (GB)" ; Expression = {"{0:N1}" -f( $_.Size / 1gb)}},@{ Name = "FreeSpace (GB)" ; Expression = {"{0:N1}" -f( $_.Freespace / 1gb ) } },@{ Name = "PercentFree" ; Expression = {"{0:P1}" -f( $_.FreeSpace / $_.Size ) } } |Format-Table -AutoSize | Out-String
+
+##Clear Event Log
+wevtutil el | Foreach-Object {wevtutil cl "$_"}
+
+# Set Eventlog Size to 20mb and retention to 30 days
+Limit-EventLog -LogName Application -MaximumSize 20MB -OverflowAction OverwriteOlder -RetentionDays 30
+Limit-EventLog -LogName System -MaximumSize 20MB -OverflowAction OverwriteOlder -RetentionDays 30
+Limit-EventLog -LogName Security -MaximumSize 20MB -OverflowAction OverwriteOlder -RetentionDays 30
+
 
 ##Stop Windows update
 Write-Host "Stops the windows update service."
@@ -213,9 +229,6 @@ foreach ( $item in $objects )
     }
 
  }
-
-
-
 
 #Delete Old User Profiles which havent logged in +XXX Days
 #$DeleteDaysback = "-9000"
@@ -379,7 +392,20 @@ Write-Host "Searching for Temp Profiles in Reg"
     write-Output "Completed searching for Temp Profiles in Reg" >> $Location
     Write-Output "##################################################################################################################" >> $Location
 
-    ClnMgr runs profile 12 C: only
+
+#Recycle Bin                  
+Write-host "Deletes the contents of the recycling Bin. "
+date-time | write-output >> $Location
+write-Output "The Recycling Bin is now being emptied!" >> $Location
+Write-Output "##################################################################################################################" >> $Location
+$RecBin.Items() | write-output >> $location
+Write-Output "##################################################################################################################" >> $Location
+$RecBin.Items() | %{Remove-Item $_.Path -Recurse -Confirm:$false}
+Write-Host "The Recycling Bin has been emptied! "
+
+
+#Cleanup 
+ClnMgr runs profile 12 C: only
 Execute-Process -FilePath “reg.exe” -Parameters “import .\clnmgr.reg” -PassThru
 Write-Output "Running Cleanup Manager" >> $Location
 clear-host
@@ -420,5 +446,5 @@ Write-Host "SCCM Cache is now $sccmCache MB"
 Write-Host "Completed Successfully! "
 Write-Host "Logs are in C:\Logs\ "
 Write-Host "You Should now restart your machine "
-start-sleep -Seconds 60
+start-sleep -Seconds 120
 exit
