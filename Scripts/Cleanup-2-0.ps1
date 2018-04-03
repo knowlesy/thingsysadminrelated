@@ -55,11 +55,12 @@ $Location = "$LogsLocation\Cleanup-$date.log"
 $Shell = New-Object -ComObject Shell.Application
 $RecBin = $Shell.Namespace(0xA)
 $sep = "C:\ProgramData\Symantec\Symantec Endpoint Protection\CurrentVersion\Data\Definitions\VirusDefs"
-$Daysback = "-90"
+$Daysback = "-90" #Days
 $Tempfolder = "C:\Temp"
-$DeleteDaysback = "-180"
+$DeleteDaysback = "-180" #Days
 $Domino2 = "$user\AppData\Local\Lotus\Notes\Data\workspace\logs"
-$sccmCache = '51200'
+$sccmCache = '51200' #MB
+$sccmlastUsed = 30  #Days
 ##########################
 
 ###########Functions###############
@@ -205,7 +206,7 @@ Get-ChildItem –Path $sep -Recurse  -Force -ErrorAction SilentlyContinue | Wher
 #SCCM Cache Clearout
 $CMObject = new-object -com "UIResource.UIResourceMgr" #Create CM object 
 $cacheInfo = $CMObject.GetCacheInfo() # get CCM cache info
-$lastUsed = 30  # laste use of folder
+
 $objects = $cacheinfo.GetCacheElements() | select-object location , LastReferenceTime, ContentSize
 
 $StartDate=(GET-DATE)
@@ -221,7 +222,7 @@ foreach ( $item in $objects )
    
   $diffDate = $StartDate - $item.LastReferenceTime
 
-   if ( $diffDate.Days -gt $lastUsed  )
+   if ( $diffDate.Days -gt $sccmlastUsed  )
     {
         $i++
         remove-item -path $item.location
