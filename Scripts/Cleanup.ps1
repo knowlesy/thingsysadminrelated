@@ -399,7 +399,7 @@ Write-Host "Searching for Temp Profiles in Reg"
     write-Output "Completed searching for Temp Profiles in Reg" >> $Location
     Write-Output "##################################################################################################################" >> $Location
 
-#
+#C:\Users\%username%\AppData\Local\Lotus\Notes\Data\workspace\logs delete *.dmp
 #https://gallery.technet.microsoft.com/scriptcenter/Deleting-the-SCCM-Cache-da03e4c7
 #https://social.technet.microsoft.com/wiki/contents/articles/31380.increase-sccm-client-cache-size.aspx
 #
