@@ -15,13 +15,13 @@
 #Cleans SEP
 #SCCM Cache Cleanup
 #Remove Old User Profiles 
-#Clean Remaininguser Profiles
+#Clean Remaining user Profiles
 ##Cleans Firefox 
 ##Cleans Chrome
 ##Cleans IE
 ##Cleans C:\users\$user\AppData\Local\Temp\*
 ##Cleans Domino for DMP in logs
-#Cleans Reg User *.bak Temp Keys
+#Cleans Reg User *.bak Temp user Keys
 #Cleans Recycle Bin  
 #Runs Clmgr
 #Sets SCCM Cache Size
@@ -346,13 +346,12 @@ Write-Host "Searching for Temp Profiles in Reg"
 	$profilereg = $key.GetSubKeyNames()
 	$profileregcount = $profilereg.count
 
-	while($profileregcount -ne 0)
-	{
-		## check for bak profiles
-
-		if($profilereg[$profileregcount-1] -like "*.bak")
+		foreach($profilereg as $profile)
 		{
-			$bakname = $profilereg[$profileregcount-1]
+    			if($profile -like "*.bak")
+    		{
+        		$bakname = $profile
+
 
 			$baknamefinal = $bakname.Split(".")[0]
 
