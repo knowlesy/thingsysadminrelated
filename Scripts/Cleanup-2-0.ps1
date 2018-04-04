@@ -29,13 +29,14 @@
 ###################################
 
 ###########ClnMgr###############
-#Initially before Running you require a .reg from CLEANMGR 
+#Initially before Running and if you require settings to CLEANMGR 
 # run in CMD elavated CLEANMGR /sageset:12 /d c:\
 #Set your settings in CLEANMGR Click OK
 #Export your Reg settings HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCache
 #Name it clnmgr.reg
 #Keep with script when running
 #If you wish to intergrate the keys you can use somthing like https://stackoverflow.com/questions/28852786/automate-process-of-disk-cleanup-cleanmgr-exe-without-user-intervention
+#If you dont specify the specific ones it will autoclean with /lowdisk
 ##########################
 
 ######################################################################################
@@ -398,21 +399,41 @@ $RecBin.Items() | %{Remove-Item $_.Path -Recurse -Confirm:$false}
 Write-Host "The Recycling Bin has been emptied! "
 
 #Cleanup 
-ClnMgr runs profile 12 C: only
+#ClnMgr runs profile 12 C: only
+if (test-path .\clnmgr.reg)
+{
 Execute-Process -FilePath “reg.exe” -Parameters “import .\clnmgr.reg” -PassThru
-Write-Output "Running Cleanup Manager" >> $Location
+Write-Output "Running Cleanup Manager with imported reg" >> $Location
 clear-host
 CLEANMGR /sagerun:12 /d c:\
 Write-Host "###########################################################"
 Write-Host "###########################################################"
 Write-Host "                                                           "
-Write-Host "    Cleanup Manager Running System will be paused          "
+Write-Host " Cleanup Manager Running with .Reg System will be paused   "
 Write-Host "                   Do not Close this box!                  "
 Write-Host "           Reg backup is in C:\Temp\Clnmgr.reg             "
 Write-Host "                                                           "
 Write-Host "###########################################################"
 Write-Host "###########################################################"
 wait-process -name cleanmgr
+}
+else
+{
+Write-Output "Running Cleanup Manager /lowdisk" >> $Location
+clear-host
+CLEANMGR /lowdisk
+Write-Host "###########################################################"
+Write-Host "###########################################################"
+Write-Host "                                                           "
+Write-Host "  Cleanup Manager Running \lowdisk System will be paused   "
+Write-Host "                   Do not Close this box!                  "
+Write-Host "           Reg backup is in C:\Temp\Clnmgr.reg             "
+Write-Host "                                                           "
+Write-Host "###########################################################"
+Write-Host "###########################################################"
+start-sleep -seconds 5
+wait-process -name cleanmgr
+}
  
 # Starts the Windows Update Service 
 Get-Service -Name wuauserv | Start-Service -Verbose 
