@@ -56,6 +56,8 @@
 #https://gallery.technet.microsoft.com/scriptcenter/Deleting-the-SCCM-Cache-da03e4c7
 #https://social.technet.microsoft.com/wiki/contents/articles/31380.increase-sccm-client-cache-size.aspx
 #https://gallery.technet.microsoft.com/Clean-the-SCCM-configMrg-b72f0b96
+#https://knowledge.autodesk.com/search-result/caas/sfdcarticles/sfdcarticles/How-to-Uninstall-Autodesk-Products-Silently-Using-Batch-Scripts.html
+#http://prosoftaec.blogspot.co.uk/2013/08/uninstall-multiple-autodesk-products.html
 ######################################################################################
 
 ###########Variables###############
