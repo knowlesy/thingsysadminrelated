@@ -27,6 +27,15 @@
 #Sets SCCM Cache Size
 ###################################
 
+###########ClnMgr###############
+#Initially before Running you require a .reg from CLEANMGR 
+# run in CMD elavated CLEANMGR /sageset:12 /d c:\
+#Set your settings in CLEANMGR Click OK
+#Export your Reg settings HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCache
+#Name it clnmgr.reg
+#Keep with script when running
+#If you wish to intergrate the keys you can use somthing like https://stackoverflow.com/questions/28852786/automate-process-of-disk-cleanup-cleanmgr-exe-without-user-intervention
+##########################
 
 ######################################################################################
 #References
@@ -63,6 +72,8 @@ $sccmCache = '51200' #MB
 $sccmlastUsed = 30  #Days
 $thefinalstraw = 'C:\Temp\Empty'
 ##########################
+
+
 
 ###########Functions###############
 function date-time
