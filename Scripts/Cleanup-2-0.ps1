@@ -61,6 +61,7 @@ $DeleteDaysback = "-180" #Days
 $Domino2 = "$user\AppData\Local\Lotus\Notes\Data\workspace\logs"
 $sccmCache = '51200' #MB
 $sccmlastUsed = 30  #Days
+$thefinalstraw = 'C:\Temp\Empty'
 ##########################
 
 ###########Functions###############
@@ -236,6 +237,7 @@ foreach ( $item in $objects )
 write-Output "Remove Old User Profiles" >> $Location
 Write-Output "##################################################################################################################" >> $Location
 write-Output "Usernames to be Deleted" >> $Location
+mkdir $thefinalstraw
 get-ciminstance win32_userprofile | where-object {$_.localpath -like "C:\Users\*"} | Where-object {$_.localpath -ne "C:\Users\defaultuser0"} | Where-object {$_.localpath -ne "C:\Users\Public"} | ? lastusetime | select lastusetime, localpath | Where-Object {($_.lastusetime -lt (Get-Date).AddDays($DeleteDaysback))} | Write-Output >> $location
 $olderprofiles = get-ciminstance win32_userprofile | where-object {$_.localpath -like "C:\Users\*"} | Where-object {$_.localpath -ne "C:\Users\defaultuser0"} | ? lastusetime | select lastusetime, localpath | Where-Object {($_.lastusetime -lt (Get-Date).AddDays($DeleteDaysback))}
 $filteredolderprofiles = $olderprofiles | select -expandproperty localpath 
@@ -245,6 +247,11 @@ $string = ($filter | Out-String).Trim()
 #$String
 Get-ChildItem –Path $string -Recurse  -Force -ErrorAction SilentlyContinue | write-output >> $location
 Get-ChildItem –Path $string -Recurse  -Force -ErrorAction SilentlyContinue | Remove-Item -recurse -Verbose -recurse -ErrorAction SilentlyContinue
+#Thefinalstraw
+if (test-path $string)
+{
+robocopy $thefinalstraw $string /zb /mir /r:1 /w:1 /MT:10 /LOG+:$LogsLocation\remove-old-users.log
+}
 }
 Write-Output "##################################################################################################################" >> $Location
 write-Output "Profiles Removed" >> $Location
