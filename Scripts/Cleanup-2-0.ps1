@@ -1,5 +1,5 @@
 ###########What It's For###############
-#Intention is to be ran as an admin for a local users of a MAchine
+#Intention is to be ran as an admin for a local users of a Machine
 #To be Ran on Win 7/8/8.1/10
 #Script Execution will need to be bypassed
 #######################################
@@ -15,6 +15,7 @@
 #Cleans SEP
 #SCCM Cache Cleanup
 #Remove Old User Profiles 
+##Remove Old User If user profiles filenames/directories are too long
 #Clean Remaining user Profiles
 ##Cleans Firefox 
 ##Cleans Chrome
@@ -56,7 +57,6 @@
 #https://gallery.technet.microsoft.com/Clean-the-SCCM-configMrg-b72f0b96
 ######################################################################################
 
-
 ###########Variables###############
 $LogsLocation = "C:\Logs\"
 $date = get-date -UFormat %y"-"%m"-"%d"-"%T  | foreach {$_ -replace ":", ""}
@@ -73,15 +73,12 @@ $sccmlastUsed = 30  #Days
 $thefinalstraw = 'C:\Temp\Empty'
 ##########################
 
-
-
 ###########Functions###############
 function date-time
 { 
    get-date -UFormat %y"-"%m"-"%d"-"%T  | foreach {$_ -replace ":", ""}
 }
 ##########################
-
 
 ##Create Location
 
@@ -128,7 +125,6 @@ wevtutil el | Foreach-Object {wevtutil cl "$_"}
 Limit-EventLog -LogName Application -MaximumSize 20MB -OverflowAction OverwriteOlder -RetentionDays 30
 Limit-EventLog -LogName System -MaximumSize 20MB -OverflowAction OverwriteOlder -RetentionDays 30
 Limit-EventLog -LogName Security -MaximumSize 20MB -OverflowAction OverwriteOlder -RetentionDays 30
-
 
 ##Stop Windows update
 Write-Host "Stops the windows update service."
@@ -205,8 +201,6 @@ Else
     Write-Output "Clnmg Reg & Profile Key backed up" >> $Location
 }
 
-
-
 #SEP
 if (test-path $sep)
 {
@@ -218,29 +212,20 @@ Get-ChildItem –Path $sep -Recurse  -Force -ErrorAction SilentlyContinue | Wher
 #SCCM Cache Clearout
 $CMObject = new-object -com "UIResource.UIResourceMgr" #Create CM object 
 $cacheInfo = $CMObject.GetCacheInfo() # get CCM cache info
-
 $objects = $cacheinfo.GetCacheElements() | select-object location , LastReferenceTime, ContentSize
-
 $StartDate=(GET-DATE)
-
 $i=0
-
 out-file -append  -filepath C:\Logs\cacheremoval.log "Clean CccmCache"  # write all things on log
-
 
 # delete all folder unused on ccm cache
 foreach ( $item in $objects )
-{
-   
+{  
   $diffDate = $StartDate - $item.LastReferenceTime
-
    if ( $diffDate.Days -gt $sccmlastUsed  )
     {
         $i++
-        remove-item -path $item.location
-       
+        remove-item -path $item.location    
     }
-
  }
 
 #Delete Old User Profiles which havent logged in +XXX Days
@@ -304,7 +289,6 @@ Write-Host -ForegroundColor yellow "Done..."
 Write-Output "Cleared Google Profile...." >> $Location
 }
 
-
 #IE 2
 if (test-path "$user\AppData\Local\Microsoft\Windows\Temporary Internet Files\")
 {
@@ -326,7 +310,6 @@ Write-Output "##################################################################
 Get-ChildItem "$user\AppData\Local\Temp\*" -Recurse -Force -ErrorAction SilentlyContinue | Where-Object { ($_.CreationTime -lt $(Get-Date).AddDays(-$DaysToDelete))} | remove-item -force -Verbose -recurse -ErrorAction SilentlyContinue 
 write-host "The contents of $user\AppData\Local\Temp\ have been removed successfully! "
 
-
 #Remove Domino Dump files
 date-time | write-output >> $Location
 write-Output "Deletes all dmp files in user's Domino Log folder" >> $Location
@@ -344,7 +327,6 @@ foreach ($DominoItem in $DominoList)
 }
 Write-Output "##################################################################################################################" >> $Location
 write-host "The contents of $user\AppData\Local\Lotus\Notes\Data\workspace\logs have been removed successfully! "
-
 }
 
 }
@@ -369,13 +351,10 @@ Write-Host "Searching for Temp Profiles in Reg"
     			if($profile -like "*.bak")
     		{
         		$bakname = $profile
-
-
 			$baknamefinal = $bakname.Split(".")[0]
 
 			## Delete bak profile
 			$key.DeleteSubKeyTree("$bakname")
-
 
 			##connect with profileGuid
 			$keyGuid = $baseKey.OpenSubKey("Software\Microsoft\Windows NT\CurrentVersion\ProfileGuid",$true)
@@ -399,8 +378,6 @@ Write-Host "Searching for Temp Profiles in Reg"
 				}
 				$Guidregcount = $Guidregcount-1
 			}
-
-
 		}
 		$profileregcount = $profileregcount-1
 	}
@@ -409,7 +386,6 @@ Write-Host "Searching for Temp Profiles in Reg"
     date-time | write-output >> $Location
     write-Output "Completed searching for Temp Profiles in Reg" >> $Location
     Write-Output "##################################################################################################################" >> $Location
-
 
 #Recycle Bin                  
 Write-host "Deletes the contents of the recycling Bin. "
@@ -420,7 +396,6 @@ $RecBin.Items() | write-output >> $location
 Write-Output "##################################################################################################################" >> $Location
 $RecBin.Items() | %{Remove-Item $_.Path -Recurse -Confirm:$false}
 Write-Host "The Recycling Bin has been emptied! "
-
 
 #Cleanup 
 ClnMgr runs profile 12 C: only
