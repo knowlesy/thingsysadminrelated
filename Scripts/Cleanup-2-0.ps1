@@ -2,6 +2,7 @@
 #Intention is to be ran as an admin for a local users of a Machine
 #To be Ran on Win 7/8/8.1/10
 #Script Execution will need to be bypassed
+#Used at your own RISK! 
 #######################################
 
 ###########What It Does############### 
