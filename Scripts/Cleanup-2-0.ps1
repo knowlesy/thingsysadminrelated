@@ -67,12 +67,12 @@ $Location = "$LogsLocation\Cleanup-$date.log"
 $Shell = New-Object -ComObject Shell.Application
 $RecBin = $Shell.Namespace(0xA)
 $sep = "C:\ProgramData\Symantec\Symantec Endpoint Protection\CurrentVersion\Data\Definitions\VirusDefs"
-$Daysback = "-90" #Days
+$Daysback = "-90" #Days for SEP
 $Tempfolder = "C:\Temp"
-$DeleteDaysback = "-180" #Days
+$DeleteDaysback = "-180" #Days for users
 $Domino2 = "$user\AppData\Local\Lotus\Notes\Data\workspace\logs"
 $sccmCache = '51200' #MB
-$sccmlastUsed = 30  #Days
+$sccmlastUsed = 30  #Days for SCCM
 $thefinalstraw = 'C:\Temp\Empty'
 ##########################
 
@@ -115,14 +115,15 @@ Write-Host "##########################################################"
 Write-Host "###########  Logs are located in $LogsLocation ###########"
 Write-Host "##########################################################"
 
-start-sleep -Seconds 5
+start-sleep -Seconds 10
 date-time | Write-Output >> $Location
 
 ##Getting Before Size
-Before = Get-WmiObject Win32_LogicalDisk | Where-Object { $_.DriveType -eq "3" } | Select-Object SystemName,@{ Name = "Drive" ; Expression = { ( $_.DeviceID ) } },@{ Name = "Size (GB)" ; Expression = {"{0:N1}" -f( $_.Size / 1gb)}},@{ Name = "FreeSpace (GB)" ; Expression = {"{0:N1}" -f( $_.Freespace / 1gb ) } },@{ Name = "PercentFree" ; Expression = {"{0:P1}" -f( $_.FreeSpace / $_.Size ) } } |Format-Table -AutoSize | Out-String
+$Before = Get-WmiObject Win32_LogicalDisk | Where-Object { $_.DriveType -eq "3" } | Select-Object SystemName,@{ Name = "Drive" ; Expression = { ( $_.DeviceID ) } },@{ Name = "Size (GB)" ; Expression = {"{0:N1}" -f( $_.Size / 1gb)}},@{ Name = "FreeSpace (GB)" ; Expression = {"{0:N1}" -f( $_.Freespace / 1gb ) } },@{ Name = "PercentFree" ; Expression = {"{0:P1}" -f( $_.FreeSpace / $_.Size ) } } |Format-Table -AutoSize | Out-String
+$Before
 
 ##Clear Event Log
-wevtutil el | Foreach-Object {wevtutil cl "$_"}
+Clear-eventlog -log application, system, security
 
 # Set Eventlog Size to 20mb and retention to 30 days
 Limit-EventLog -LogName Application -MaximumSize 20MB -OverflowAction OverwriteOlder -RetentionDays 30
@@ -208,8 +209,8 @@ Else
 if (test-path $sep)
 {
 Write-Host "Clearing Sep"
-Get-ChildItem –Path $sep -Recurse  -Force -ErrorAction SilentlyContinue | Where-Object {($_.LastWriteTime -lt (Get-Date).AddDays($Daysback))} | Where-object {$_.localpath -like "C:\ProgramData\Symantec\Symantec Endpoint Protection\CurrentVersion\Data\Definitions\VirusDefs\20"} | write-output >> $Location
-Get-ChildItem –Path $sep -Recurse  -Force -ErrorAction SilentlyContinue | Where-Object {($_.LastWriteTime -lt (Get-Date).AddDays($Daysback))} | Where-object {$_.localpath -like "C:\ProgramData\Symantec\Symantec Endpoint Protection\CurrentVersion\Data\Definitions\VirusDefs\20"} | Remove-Item -Force -ErrorAction SilentlyContinue 
+Get-ChildItem –Path $sep -Recurse -Force -ErrorAction SilentlyContinue | Where-Object {($_.LastWriteTime -lt (Get-Date).AddDays($Daysback))} | Where-object {$_.localpath -like "C:\ProgramData\Symantec\Symantec Endpoint Protection\CurrentVersion\Data\Definitions\VirusDefs\20"} | write-output >> $Location
+Get-ChildItem –Path $sep -Recurse -Force -ErrorAction SilentlyContinue | Where-Object {($_.LastWriteTime -lt (Get-Date).AddDays($Daysback))} | Where-object {$_.localpath -like "C:\ProgramData\Symantec\Symantec Endpoint Protection\CurrentVersion\Data\Definitions\VirusDefs\20"} | Remove-Item -Force -ErrorAction SilentlyContinue 
 }
 
 #SCCM Cache Clearout
@@ -227,7 +228,7 @@ foreach ( $item in $objects )
    if ( $diffDate.Days -gt $sccmlastUsed  )
     {
         $i++
-        remove-item -path $item.location    
+        remove-item -path $item.location -Recurse -Force -ErrorAction SilentlyContinue    
     }
  }
 
@@ -349,7 +350,7 @@ Write-Host "Searching for Temp Profiles in Reg"
 	$profilereg = $key.GetSubKeyNames()
 	$profileregcount = $profilereg.count
 
-		foreach($profilereg as $profile)
+		foreach($profilereg in $profile)
 		{
     			if($profile -like "*.bak")
     		{
@@ -406,7 +407,7 @@ if (test-path .\clnmgr.reg)
 {
 Execute-Process -FilePath “reg.exe” -Parameters “import .\clnmgr.reg” -PassThru
 Write-Output "Running Cleanup Manager with imported reg" >> $Location
-clear-host
+#clear-host
 CLEANMGR /sagerun:12 /d c:\
 Write-Host "###########################################################"
 Write-Host "###########################################################"
@@ -422,7 +423,7 @@ wait-process -name cleanmgr
 else
 {
 Write-Output "Running Cleanup Manager /lowdisk" >> $Location
-clear-host
+#clear-host
 CLEANMGR /lowdisk
 Write-Host "###########################################################"
 Write-Host "###########################################################"
