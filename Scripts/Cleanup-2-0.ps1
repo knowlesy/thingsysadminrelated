@@ -471,10 +471,10 @@ Write-Host "You Should now restart your machine "
 If ($LogExists -eq "Yes")
 {
 Write-Output "###########"
-Write-Output "C:\Logs Folder Previously Existed you should check here to clear more space" >> $Location
+Write-Output "$LogsLocation Folder Previously Existed you should check here to clear more space" >> $Location
 Write-Output "###########"
 Write-Host "########################################################################"
-Write-Host "C:\Logs Previously existed More Space may be able to be claimed here
+Write-Host "$LogsLocation Previously existed More Space may be able to be claimed here
 Write-Host "########################################################################"
 }
 
