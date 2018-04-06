@@ -459,25 +459,33 @@ $After =  Get-WmiObject Win32_LogicalDisk | Where-Object { $_.DriveType -eq "3" 
 Hostname ; Get-Date | Select-Object DateTime 
 Write-Output "Before: $Before" >> $Location 
 Write-Output "After: $After" >> $Location
-Write-Host "Before: $Before"
-Write-Host "After: $After"
-Write-Host "SCCM Cache is now $sccmCache MB"
-Write-Host "Completed Successfully! "
-Write-Host "Logs are in C:\Logs\ "
 Write-Output "To gain further space use Windirstat to identify where the additional space can be aquired " >> $Location 
 Write-Output "You Should now restart your machine " >> $Location 
+
+Write-Host "Before: $Before"
+Write-Host "After: $After"
+Write-Host "Completed Successfully! "
+Write-Host "Logs are in C:\Logs\ "
 Write-Host "To gain further space use Windirstat to identify where the additional space can be aquired "
 Write-Host "You Should now restart your machine "
+
 If ($LogExists -eq "Yes")
 {
 Write-Output "###########"
 Write-Output "$LogsLocation Folder Previously Existed you should check here to clear more space" >> $Location
 Write-Output "###########"
+
 Write-Host "########################################################################"
 Write-Host "$LogsLocation Previously existed More Space may be able to be claimed here
 Write-Host "########################################################################"
 }
 Write-Host "Script will close in 2 Minutes"
 start-sleep -Seconds 120
+
+Write-Output "##################################################################################################################" >> $Location
+    date-time | write-output >> $Location
+    write-Output "Script Ended >> $Location
+Write-Output "##################################################################################################################" >> $Location    
+    
 clear-host
 exit
