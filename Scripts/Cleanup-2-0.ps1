@@ -90,6 +90,7 @@ If (test-path $LogsLocation)
     new-item "$LogsLocation\Cleanup-$date.log" -ItemType file
     date-time | Write-Output >> $Location
     Write-Output "Script Started" >> $Location
+    $LogExists = Yes
 }
 Else
 {
@@ -97,6 +98,7 @@ Else
     new-item "$LogsLocation\Cleanup-$date.log"  -ItemType file
     date-time | Write-Output >> $Location
     Write-Output "Script Started" >> $Location
+    $LogExists = No
 }
 
 clear-host
@@ -462,6 +464,19 @@ Write-Host "After: $After"
 Write-Host "SCCM Cache is now $sccmCache MB"
 Write-Host "Completed Successfully! "
 Write-Host "Logs are in C:\Logs\ "
+Write-Output "To gain further space use Windirstat to identify where the additional space can be aquired " >> $Location 
+Write-Output "You Should now restart your machine " >> $Location 
+Write-Host "To gain further space use Windirstat to identify where the additional space can be aquired "
 Write-Host "You Should now restart your machine "
+If ($LogExists -eq "Yes")
+{
+Write-Output "###########"
+Write-Output "C:\Logs Folder Previously Existed you should check here to clear more space" >> $Location
+Write-Output "###########"
+Write-Host "########################################################################"
+Write-Host "C:\Logs Previously existed More Space may be able to be claimed here
+Write-Host "########################################################################"
+}
+
 start-sleep -Seconds 120
 exit
