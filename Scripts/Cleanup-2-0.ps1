@@ -14,9 +14,8 @@
 #Disables Hibernation
 #Cleans C:\Temp
 #Cleans SEP
-#SCache Cleanup
+#SCCM Cache Cleanup C:\windows\ccmcache
 #Remove Old User Profiles 
-##Remove Old User If user profiles filenames/directories are too long
 #Clean Remaining user Profiles
 ##Cleans Firefox 
 ##Cleans Chrome
@@ -26,7 +25,7 @@
 #Cleans Reg User *.bak Temp user Keys
 #Cleans Recycle Bin  
 #Runs Clmgr
-#Sets SCCM Cache Size
+#Sets SCCM Cache Size if C:\windows\ccmcache exists
 ###################################
 
 ###########ClnMgr###############
