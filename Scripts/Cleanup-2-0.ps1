@@ -63,17 +63,17 @@
 ###########Variables###############
 $LogsLocation = "C:\Logs\"
 $date = get-date -UFormat %y"-"%m"-"%d"-"%T  | foreach {$_ -replace ":", ""}
-$Location = "$LogsLocation\Cleanup-$date.log"
+$Location = "$LogsLocation\Cleanup-$date.log" # For main LOG
 $Shell = New-Object -ComObject Shell.Application
-$RecBin = $Shell.Namespace(0xA)
-$sep = "C:\ProgramData\Symantec\Symantec Endpoint Protection\CurrentVersion\Data\Definitions\VirusDefs"
-$Daysback = "-90" #Days for SEP
+$RecBin = $Shell.Namespace(0xA) # Recycle Bin
+$sep = "C:\ProgramData\Symantec\Symantec Endpoint Protection\CurrentVersion\Data\Definitions\VirusDefs" #Sep location
+$Daysback = "-90" #Days for SEP to remove  virus defs
 $Tempfolder = "C:\Temp"
 $DeleteDaysback = "-180" #Days for users
-$Domino2 = "$user\AppData\Local\Lotus\Notes\Data\workspace\logs"
-$sccmCache = '51200' #MB
+$Domino2 = "$user\AppData\Local\Lotus\Notes\Data\workspace\logs" #lotus domino
+$sccmCache = '51200' #MB will set sccm cache size
 $sccmlastUsed = 30  #Days for SCCM
-$thefinalstraw = 'C:\Temp\Empty'
+$thefinalstraw = 'C:\Temp\Empty' #creates empty folder to nuke older profiles
 ##########################
 
 ###########Functions###############
