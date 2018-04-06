@@ -477,6 +477,7 @@ Write-Host "####################################################################
 Write-Host "$LogsLocation Previously existed More Space may be able to be claimed here
 Write-Host "########################################################################"
 }
-
+Write-Host "Script will close in 2 Minutes"
 start-sleep -Seconds 120
+clear-host
 exit
