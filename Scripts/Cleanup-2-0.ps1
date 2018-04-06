@@ -14,7 +14,7 @@
 #Disables Hibernation
 #Cleans C:\Temp
 #Cleans SEP
-#SCCM Cache Cleanup
+#SCache Cleanup
 #Remove Old User Profiles 
 ##Remove Old User If user profiles filenames/directories are too long
 #Clean Remaining user Profiles
@@ -215,6 +215,8 @@ Get-ChildItem –Path $sep -Recurse -Force -ErrorAction SilentlyContinue | Where
 }
 
 #SCCM Cache Clearout
+If (test-path "c:\windows\ccmcache")
+{
 $CMObject = new-object -com "UIResource.UIResourceMgr" #Create CM object 
 $cacheInfo = $CMObject.GetCacheInfo() # get CCM cache info
 $objects = $cacheinfo.GetCacheElements() | select-object location , LastReferenceTime, ContentSize
@@ -231,6 +233,7 @@ foreach ( $item in $objects )
         $i++
         remove-item -path $item.location -Recurse -Force -ErrorAction SilentlyContinue    
     }
+ }
  }
 
 #Delete Old User Profiles which havent logged in +XXX Days
