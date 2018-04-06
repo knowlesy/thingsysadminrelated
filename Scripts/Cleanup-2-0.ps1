@@ -441,11 +441,16 @@ Write-Host "Starting Windows Update Service"
 Write-Output "Starting Windows Update Service" >> $Location
 
 #Sets SCCM Cache Size
+If (test-path "c:\windows\ccmcache")
+{
 $Cache = Get-WmiObject -Namespace 'ROOT\CCM\SoftMgmtAgent' -Class CacheConfig
 $Cache.Size = $sccmCache
 $Cache.Put()
 Restart-Service -Name CcmExec
 
+Write-Output "SCCM Cache is now $sccmCache MB"
+
+}
 #Grab how much free data 
 $After =  Get-WmiObject Win32_LogicalDisk | Where-Object { $_.DriveType -eq "3" } | Select-Object SystemName,@{ Name = "Drive" ; Expression = { ( $_.DeviceID ) } }, @{ Name = "Size (GB)" ; Expression = {"{0:N1}" -f( $_.Size / 1gb)}}, @{ Name = "FreeSpace (GB)" ; Expression = {"{0:N1}" -f( $_.Freespace / 1gb ) } }, @{ Name = "PercentFree" ; Expression = {"{0:P1}" -f( $_.FreeSpace / $_.Size ) } } | Format-Table -AutoSize | Out-String 
  
@@ -453,7 +458,6 @@ $After =  Get-WmiObject Win32_LogicalDisk | Where-Object { $_.DriveType -eq "3" 
 Hostname ; Get-Date | Select-Object DateTime 
 Write-Output "Before: $Before" >> $Location 
 Write-Output "After: $After" >> $Location
-Write-Output "SCCM Cache is now $sccmCache MB"
 Write-Host "Before: $Before"
 Write-Host "After: $After"
 Write-Host "SCCM Cache is now $sccmCache MB"
