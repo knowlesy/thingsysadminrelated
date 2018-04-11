@@ -1,10 +1,14 @@
 Add-PSSnapin VeeamPSSnapin
 ###VARIABLE###
-$servers = "SERVER1","SERVER2"
-$LogLocation = "<LOCATION>"
+$servers = "server1","server2"
+$LogLocation = "\\Server\Veeam$\VeeamLog.log" #Full Log for diagnostics attched to email
+$EmailLog = "\\Server\Veeam\EmailVeeamLog.log" #Cutdown Log > Data improted to a seperate Script as Email
+$timeran = Get-Date
+$wherewasthisranfrom = $env:computername
+
 ##############
 
-
+write-line "Script is Ran from $wherewasthisranfrom at $timeran" >> $LogLocation
 foreach ($server in $servers)
 {
     If (Test-Connection $server -Count 2)
@@ -19,6 +23,10 @@ foreach ($server in $servers)
             Write-Line "$Server" >> $LogLocation
             Write-Line "No Jobs running on $server at the time of this report" >> $LogLocation
             Write-Line "" >> $LogLocation
+            Write-Line "" >> $EmailLog
+            Write-Line "$Server" >> $EmailLog
+            Write-Line "No Jobs running on $server at the time of this report" >> $EmailLog
+            Write-Line "" >> $EmailLog
             #Get-VBRJob
         }
         Else
@@ -28,6 +36,11 @@ foreach ($server in $servers)
             Write-Line "Jobs running on $server at the time of this report" >> $LogLocation
             $whatsrunning  >> $LogLocation
             Write-Line "" >> $LogLocation
+            Write-Line "" >> $EmailLog
+            Write-Line "$Server" >> $EmailLog
+            Write-Line "Jobs running on $server at the time of this report" >> $EmailLog
+            $whatsrunning  >> $EmailLog
+            Write-Line "" >> $EmailLog
 
         }
         
@@ -37,5 +50,7 @@ foreach ($server in $servers)
     Else
     {
         Write-Line "Could not Connect to $server" >> $LogLocation
+        Write-Line "Could not Connect to $server" >> $EmailLog
     }
+    write-line "Script is Ran from $wherewasthisranfrom at $timeran" >> $EmailLog
 }
