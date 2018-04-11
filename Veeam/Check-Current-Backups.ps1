@@ -2,13 +2,14 @@ Add-PSSnapin VeeamPSSnapin
 ###VARIABLE###
 $servers = "server1","server2"
 $LogLocation = "\\server\Veeam$\VeeamLog.log" #Full Log for diagnostics attched to email
-$EmailLog = "\\server\Veeam$\EmailVeeamLog.log" #Cutdown Log > Data improted to a seperate Script as Email
+$EmailLog = "\\server\Veeam$\EmailVeeamLog.log"#Final Log for email
+$EmailLogTemp = "\\server\Veeam$\EmailVeeamLogTemp.log" #Cutdown Log > will be modified at end to ad html formatting
 $timeran = Get-Date
 
 $wherewasthisranfrom = $env:computername
 
 ##############
-
+Write-Output "" > $EmailLog
 Write-Output "Script is Ran from $wherewasthisranfrom at $timeran" >> $LogLocation
 Write-Output "" >> $LogLocation
 foreach ($server in $servers)
@@ -17,18 +18,18 @@ foreach ($server in $servers)
     {
         Connect-VBRServer -Server $server
         Write-Output "Connecting to $Server" >> $LogLocation
-        $whatsrunning = Get-VBRJob |Where-Object {$_.IsRunning -eq "True" }|Where-Object {$_.JobType -eq "Backup"}| Format-Table -Property Name,JobType,IsRunning -AutoSize
+        $whatsrunning = Get-VBRJob |Where-Object {$_.IsRunning -eq "True" }|Where-Object {$_.JobType -eq "Backup"}| Format-Table -Property Name -AutoSize
         
         if (($whatsrunning).length -eq "0")
         {
             Write-Output "" >> $LogLocation
-            Write-Output "$Server" >> $LogLocation
+            #Write-Output "$Server" >> $LogLocation
             Write-Output "No Jobs running on $server at the time of this report" >> $LogLocation
             Write-Output "" >> $LogLocation
-            Write-Output "" >> $EmailLog
-            Write-Output "$Server" >> $EmailLog
-            Write-Output "No Jobs running on $server at the time of this report" >> $EmailLog
-            Write-Output "" >> $EmailLog
+            Write-Output "" >> $EmailLogTemp
+            #Write-Output "$Server " >> $EmailLogTemp
+            Write-Output "No Jobs running on $server at the time of this report " >> $EmailLogTemp
+            Write-Output "" >> $EmailLogTemp
             #Get-VBRJob
         }
         Else
@@ -38,11 +39,11 @@ foreach ($server in $servers)
             Write-Output "Jobs running on $server at the time of this report" >> $LogLocation
             $whatsrunning  >> $LogLocation
             Write-Output "" >> $LogLocation
-            Write-Output "" >> $EmailLog
-            Write-Output "$Server" >> $EmailLog
-            Write-Output "Jobs running on $server at the time of this report" >> $EmailLog
-            $whatsrunning  >> $EmailLog
-            Write-Output "" >> $EmailLog
+            Write-Output "" >> $EmailLogTemp
+            Write-Output "$Server" >> $EmailLogTemp
+            Write-Output "Jobs running on $server at the time of this report" >> $EmailLogTemp
+            $whatsrunning  >> $EmailLogTemp
+            Write-Output "" >> $EmailLogTemp
 
         }
         
@@ -52,10 +53,13 @@ foreach ($server in $servers)
     Else
     {
         Write-Output "Could not Connect to $server" >> $LogLocation
-        Write-Output "Could not Connect to $server" >> $EmailLog
+        Write-Output "Could not Connect to $server " >> $EmailLogTemp
     }
-    Write-Output "Script is Ran from $wherewasthisranfrom at $timeran" >> $EmailLog
+   # Write-Output "Script is Ran from $wherewasthisranfrom at $timeran " >> $EmailLogTemp
 }
+Get-Content $EmailLogTemp | foreach {add-content $EmailLog "$_ </BR>"} 
+
 $completetime = Get-Date
 Write-Output "" >> $LogLocation
 Write-Output "Script Complete $completetime" >> $LogLocation
+Remove-Item $EmailLogTemp
