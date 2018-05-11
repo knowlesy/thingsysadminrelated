@@ -3,33 +3,34 @@
 #https://4sysops.com/archives/create-a-new-folder-and-set-permissions-with-powershell/ 
 
 #Pre-Set Variables#
-$AdminGroup = 'Test-FS-AdminGroup'
-$SelectedAdminGroup = 'Test-FS-InfraAdminGroup'
-$DefaultSharelocation = 'C:\Shares'
-$DefaultSharelocationNet = 'c$\Shares'
-$GeographicLocation = 'UK'
-$ServerServiceAccount = 'test.local\FileServers'
-$Company = 'Contoso'
-$ShareGroupOU = "OU=Share-Group,OU=Group,OU=NCL,OU=UK,OU=EMEA,DC=test,DC=local"
-$SecurityGrupOU = "OU=Security-Group,OU=Group,OU=NCL,OU=UK,OU=EMEA,DC=test,DC=local"
+$AdminGroup = 'Test-FS-AdminGroup' #Set default File Share Admin Group this should be for l2 and above
+$SelectedAdminGroup = 'Test-FS-InfraAdminGroup' #The HR Clause this should be for Teamleads only
+$DefaultSharelocation = 'C:\Shares' # local reference
+$DefaultSharelocationNet = 'c$\Shares' #Network reference for explicit direction
+$GeographicLocation = 'UK' #This could be business unit or another reference edit as you wish
+$ServerServiceAccount = 'test.local\FileServers' #Audit rights / backups etc typically one per server 
+$Company = 'Contoso' # your company / business unit / reference
+$ShareGroupOU = "OU=Share-Group,OU=Group,OU=NCL,OU=UK,OU=EMEA,DC=test,DC=local" #OU for Share Groups
+$SecurityGrupOU = "OU=Security-Group,OU=Group,OU=NCL,OU=UK,OU=EMEA,DC=test,DC=local" #OU for Security group permissions 
 #Log/Event
 
 #Fixed Variables#
-$GroupStandard = "$GeographicLocation-$Company-$FileServer-$FolderName"
-$ShareGroupR = "$GroupStandard-SH-R"
-$ShareGroupC = "$GroupStandard-SH-C"
-$ShareGroupFC = "$GroupStandard-SH-FC"
-$SecurityGroupR = "$GroupStandard-SE-R"
-$SecurityGroupM = "$GroupStandard-SE-M"
-$SecurityGroupFC = "$GroupStandard-SE-FC"
-$AuditUser = "Everyone"
-$AuditRules = "Delete,DeleteSubdirectoriesAndFiles,ChangePermissions,Takeownership"
-$InheritType = "ContainerInherit,ObjectInherit"
-$AuditType = "Success"
-$AccessRule = New-Object System.Security.AccessControl.FileSystemAuditRule($AuditUser,$AuditRules,$InheritType,"None",$AuditType)
-$FullLocation = "\\$FileServer\$DefaultSharelocationNet\$FolderName"
-$RootFolder = "\\$FileServer\$DefaultSharelocationNet\"
-$ShareLocation = "\\$FileServer\$FolderName"
+$GroupStandard = "$GeographicLocation-$Company-$FileServer-$FolderName" #Naming convention for groups
+$ShareGroupR = "$GroupStandard-SH-R" #Read only chare group
+$ShareGroupC = "$GroupStandard-SH-C" #Change Share Group
+$ShareGroupFC = "$GroupStandard-SH-FC" #Full Control Share Group
+$SecurityGroupR = "$GroupStandard-SE-R" #Read only NTFS Permissions
+$SecurityGroupM = "$GroupStandard-SE-M" #Modify R/W & Delete Set by standard by default this is a special permission set
+$SecurityGroupFC = "$GroupStandard-SE-FC" # Full NTFS Control 
+$AuditUser = "Everyone" #Everyone for auditing 
+$AuditRules = "Delete,DeleteSubdirectoriesAndFiles,ChangePermissions,Takeownership" #audit actions were looking for 
+$InheritType = "ContainerInherit,ObjectInherit" #inherritance 
+$AuditType = "Success" #actions yes or no
+$AccessRule = New-Object System.Security.AccessControl.FileSystemAuditRule($AuditUser,$AuditRules,$InheritType,"None",$AuditType) #setting the rule 
+$FullLocation = "\\$FileServer\$DefaultSharelocationNet\$FolderName" #Full network Server / Disk Folder Location
+$RootFolder = "\\$FileServer\$DefaultSharelocationNet\"# Root of Network Server / Disk Location
+$ShareLocation = "\\$FileServer\$FolderName" # Share location
+$Sourcepath = "$DefaultSharelocation\$FolderName" #on server folder created location
 #Log/Event
 
 #User input Variables#
@@ -141,4 +142,4 @@ New-SmbShare -Name $FolderName -cimsession $FileServer -ContinuouslyAvailable 0 
 
 #Confirm folder types for FSRM
 #Confirm quotas
-#Add to DFS
+#add to dfs
