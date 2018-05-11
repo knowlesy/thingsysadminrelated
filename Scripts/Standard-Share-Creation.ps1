@@ -36,6 +36,7 @@ $ShareLocation = "\\$FileServer\$FolderName"
 $FileServer = '2016-FS1' #Read-Host -Prompt 'Enter File Server'
 $FolderName = 'Test4' #Read-Host -Prompt 'Enter Share Name' 
 #HR-Saftey Tag is this for HR if so then reduced Admins 
+#Request incident number
 #Log/Event
 
 Write-Host "Importing AD Module"
@@ -137,3 +138,7 @@ Write-Host "Audit Policy applied successfully."
 New-SmbShare -Name $FolderName -cimsession $FileServer -ContinuouslyAvailable 0 -ReadAccess $ShareGroupR -FullAccess $ShareGroupFC -ChangeAccess $ShareGroupC -Path $Sourcepath -ErrorAction SilentlyContinue
 #TestSMB Creation
 #Log/Event
+
+#Confirm folder types for FSRM
+#Confirm quotas
+#Add to DFS
