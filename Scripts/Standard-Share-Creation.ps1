@@ -76,6 +76,10 @@ If ($ErrorAD) {
    Exit 
 
 }
+Else
+{
+Write-Log -EntryType Error -Message "AD Module imported"
+}
 
 
 
@@ -121,39 +125,126 @@ Else
 
 #Creating Shares Privalages for that Folder 
 #Read Access
-New-ADGroup -Name "$ShareGroupR" -Description "$FileServer - $FolderName Share Read Access" -DisplayName "$ShareGroupR" -GroupScope Global -Path $ShareGroupOU
-#Ask are authenticated users to be added - check for HR Flag
+New-ADGroup -Name "$ShareGroupR" -Description "$FileServer - $FolderName Share Read Access" -DisplayName "$ShareGroupR" -GroupScope Global -Path $ShareGroupOU -ErrorVariable TEST -ErrorAction SilentlyContinue
+If ($TEST) {
+
+   Write-Log -EntryType Error -Message ""
+   Exit 
+
+}
+Else
+{
+    Write-Log -EntryType Error -Message ""
+}
+#Request to add users
 
 #Change Access
-New-ADGroup -Name "$ShareGroupC" -Description "$FileServer - $FolderName Share Change Access" -DisplayName "$ShareGroupC" -GroupScope Global -Path $ShareGroupOU
-#Ask are authenticated users to be added - check for HR Flag
+New-ADGroup -Name "$ShareGroupC" -Description "$FileServer - $FolderName Share Change Access" -DisplayName "$ShareGroupC" -GroupScope Global -Path $ShareGroupOU -ErrorVariable TEST -ErrorAction SilentlyContinue
+If ($TEST) {
+
+   Write-Log -EntryType Error -Message ""
+   Exit 
+
+}
+Else
+{
+    Write-Log -EntryType Error -Message ""
+}
+#Request to add users
 
 #Full Control
-New-ADGroup -Name "$ShareGroupFC" -Description "$FileServer - $FolderName Share Full Control Access" -DisplayName "$ShareGroupFC" -GroupScope Global -Path $ShareGroupOU
+New-ADGroup -Name "$ShareGroupFC" -Description "$FileServer - $FolderName Share Full Control Access" -DisplayName "$ShareGroupFC" -GroupScope Global -Path $ShareGroupOU -ErrorVariable TEST -ErrorAction SilentlyContinue
+If ($TEST) {
 
-#Check for HR Flag
-#Add Default Admins / Service Account
-Add-ADGroupMember -Identity "$ShareGroupFC" -Members "$AdminGroup", "$ServerServiceAccount" 
+   Write-Log -EntryType Error -Message ""
+   Exit 
+
+}
+Else
+{
+    Write-Log -EntryType Error -Message ""
+}
+If ($SecureShare -eq "True")
+{
+    #Request to add users
+    Write-Log -EntryType Warning -Message "" 
+    Add-ADGroupMember -Identity "$ShareGroupFC" -Members "$SelectedAdminGroup","$ServerServiceAccount"
+}
+Else
+{
+    #Request to add users
+    Write-Log -EntryType Information -Message "" 
+    Add-ADGroupMember -Identity "$ShareGroupFC" -Members "$AdminGroup", "$ServerServiceAccount" 
+}
+
 
 #Creating Security Privalages for that Folder 
 #Read Access
-New-ADGroup -Name "$SecurityGroupR" -Description "$FileServer - $FolderName Security Read Access" -DisplayName "$SecurityGroupR" -GroupScope Global -Path $ShareGroupOU
-#Ask are authenticated users to be added - check for HR Flag
+New-ADGroup -Name "$SecurityGroupR" -Description "$FileServer - $FolderName Security Read Access" -DisplayName "$SecurityGroupR" -GroupScope Global -Path $ShareGroupOU -ErrorVariable TEST -ErrorAction SilentlyContinue
+If ($TEST) {
+
+   Write-Log -EntryType Error -Message ""
+   Exit 
+
+}
+Else
+{
+    Write-Log -EntryType Error -Message ""
+} 
+#Request to add users
 
 #Change Access
-New-ADGroup -Name "$SecurityGroupM" -Description "$FileServer - $FolderName Security Modify Access" -DisplayName "$SecurityGroupC" -GroupScope Global -Path $ShareGroupOU
-#Ask are authenticated users to be added - check for HR Flag
+New-ADGroup -Name "$SecurityGroupM" -Description "$FileServer - $FolderName Security Modify Access" -DisplayName "$SecurityGroupC" -GroupScope Global -Path $ShareGroupOU -ErrorVariable TEST -ErrorAction SilentlyContinue
+If ($TEST) {
+
+   Write-Log -EntryType Error -Message ""
+   Exit 
+
+}
+Else
+{
+    Write-Log -EntryType Error -Message ""
+}
+#Request to add users
 
 #Full Control
-New-ADGroup -Name "$SecurityGroupFC" -Description "$FileServer - $FolderName Security Full Control Access" -DisplayName "$SecurityGroupFC" -GroupScope Global -Path $ShareGroupOU
+New-ADGroup -Name "$SecurityGroupFC" -Description "$FileServer - $FolderName Security Full Control Access" -DisplayName "$SecurityGroupFC" -GroupScope Global -Path $ShareGroupOU -ErrorVariable TEST -ErrorAction SilentlyContinue
+If ($TEST) {
 
-#Check for HR Flag
-#Add Default Admins / Service Account
-Add-ADGroupMember -Identity "$SecurityGroupFC" -Members "$AdminGroup", "$ServerServiceAccount" 
-#Log/Event
+   Write-Log -EntryType Error -Message ""
+   Exit 
 
-New-Item -Path $FullLocation -ItemType Directory -Name $RootFolder
-#Log/Event
+}
+Else
+{
+    Write-Log -EntryType Error -Message ""
+}
+If ($SecureShare -eq "True")
+{
+    #Request to add users
+    Write-Log -EntryType Warning -Message "" 
+    Add-ADGroupMember -Identity "$SecurityGroupFC" -Members "$SelectedAdminGroup","$ServerServiceAccount"
+}
+Else
+{
+    #Request to add users
+    Write-Log -EntryType Information -Message "" 
+    Add-ADGroupMember -Identity "$SecurityGroupFC" -Members "$AdminGroup", "$ServerServiceAccount" 
+}
+
+
+New-Item -Path $FullLocation -ItemType Directory -Name $RootFolder -ErrorVariable TEST -ErrorAction SilentlyContinue
+If ($TEST) {
+
+   Write-Log -EntryType Error -Message ""
+   Exit 
+
+}
+Else
+{
+    Write-Log -EntryType Error -Message ""
+}
+
 
 
 #Set Security PErmissions https://4sysops.com/archives/create-a-new-folder-and-set-permissions-with-powershell/ 
@@ -164,13 +255,23 @@ $ACL = Get-Acl $Sourcepath
 $ACL.SetAuditRule($AccessRule)
 Write-Host "Processing >",$Sourcepath
 $ACL | Set-Acl $Sourcepath
-Write-Host "Audit Policy applied successfully."
+Write-Log -EntryType Information -Message "Audit Policy applied successfully."
 
 
 
-New-SmbShare -Name $FolderName -cimsession $FileServer -ContinuouslyAvailable 0 -ReadAccess $ShareGroupR -FullAccess $ShareGroupFC -ChangeAccess $ShareGroupC -Path $Sourcepath -ErrorAction SilentlyContinue
+New-SmbShare -Name $FolderName -cimsession $FileServer -ContinuouslyAvailable 0 -ReadAccess $ShareGroupR -FullAccess $ShareGroupFC -ChangeAccess $ShareGroupC -Path $Sourcepath-ErrorVariable ErrorAD -ErrorAction SilentlyContinue
+If ($ErrorAD) {
+
+   Write-Log -EntryType Error -Message "AD Module could not be imported"
+   Exit 
+
+}
+Else
+{
+Write-Log -EntryType Error -Message "AD Module imported"
+}
 #TestSMB Creation
-#Log/Event
+
 
 #Confirm folder types for FSRM
 #Confirm quotas
