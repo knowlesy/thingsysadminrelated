@@ -2,6 +2,13 @@
 #https://technochat.in/2014/05/set-file-system-auditing-via-powershell/
 #https://4sysops.com/archives/create-a-new-folder-and-set-permissions-with-powershell/ 
 
+#Logging
+Import-Module C:\Temp\PSMultiLog.psm1
+Start-FileLog -FilePath c:\Logs\FilServer.log -LogLevel Information # Log everything.
+Start-EventLogLog -Source "Share-Creation" 
+Start-HostLog -LogLevel Information
+
+
 #Pre-Set Variables#
 $AdminGroup = 'Test-FS-AdminGroup' #Set default File Share Admin Group this should be for l2 and above
 $SelectedAdminGroup = 'Test-FS-InfraAdminGroup' #The HR Clause this should be for Teamleads only
@@ -12,7 +19,15 @@ $ServerServiceAccount = 'test.local\FileServers' #Audit rights / backups etc typ
 $Company = 'Contoso' # your company / business unit / reference
 $ShareGroupOU = "OU=Share-Group,OU=Group,OU=NCL,OU=UK,OU=EMEA,DC=test,DC=local" #OU for Share Groups
 $SecurityGrupOU = "OU=Security-Group,OU=Group,OU=NCL,OU=UK,OU=EMEA,DC=test,DC=local" #OU for Security group permissions 
-#Log/Event
+Write-Log -EntryType Information -Message "Admin grop used, $AdminGroup"
+Write-Log -EntryType Information -Message "Restricted Admins, $SelectedAdminGroup"
+Write-Log -EntryType Information -Message "Default Share location, $DefaultSharelocation"
+Write-Log -EntryType Information -Message "Network reference location, $DefaultSharelocationNet"
+Write-Log -EntryType Information -Message "Geographic location, $GeographicLocation"
+Write-Log -EntryType Information -Message "Service account, $ServerServiceAccount"
+Write-Log -EntryType Information -Message "Entity is, $Company"
+Write-Log -EntryType Information -Message "Share group is, $ShareGroupOU"
+Write-Log -EntryType Information -Message "Security Group is, $SecurityGrupOU"
 
 #Fixed Variables#
 $GroupStandard = "$GeographicLocation-$Company-$FileServer-$FolderName" #Naming convention for groups
@@ -35,25 +50,44 @@ $Sourcepath = "$DefaultSharelocation\$FolderName" #on server folder created loca
 
 #User input Variables#
 $FileServer = '2016-FS1' #Read-Host -Prompt 'Enter File Server'
-$FolderName = 'Test4' #Read-Host -Prompt 'Enter Share Name' 
-#HR-Saftey Tag is this for HR if so then reduced Admins 
-#Request incident number
-#Log/Event
+Write-Log -EntryType Information -Message "Server Entered $FileServer"
+$FolderName = 'Test4' #Read-Host -Prompt 'Enter Share Name'
+Write-Log -EntryType Information -Message "Sharename Entered $FolderName" 
+$Secureconfirm = Read-Host "n" #"Confirm is this a secure Share? Y/N"
+If(($confirm) -eq "y")
+{
+   Write-Log -EntryType Information -Message "Secure Share selected" 
+   $SecureShare = "True"
+}
+Else
+{
+   Write-Log -EntryType Information -Message "Secure Share Not Selected"  
+   $SecureShare = "False"
+}
+$IncidentRef = 'INC12345' #Read-Host -Prompt 'Enter Incident Ref'
+Write-Log -EntryType Information -Message "Incident Ref is $IncidentRef"
+
 
 Write-Host "Importing AD Module"
-Import-Module -Name ActiveDirectory -ErrorAction Stop
-#Log/Event
+Import-Module -Name ActiveDirectory -ErrorVariable ErrorAD -ErrorAction SilentlyContinue
+If ($ErrorAD) {
+
+   Write-Log -EntryType Error -Message "AD Module could not be imported"
+   Exit 
+
+}
+
 
 
 #Testing Server is online
 if(Test-Connection -Count 2 -ComputerName $FileServer -Quiet)
 {
-    #Log/Event
+    Write-Log -EntryType Information -Message "Server Responded Success" 
     Write-Host "Server Responded - Success"
 }
 else
 {
-    #Log/Event
+    Write-Log -EntryType Error -Message "Server Failed to Respond - Script will now close" 
     Write-Host "Server Failed to Respond - Script will now close"
     Start-Sleep -Seconds 60
     Exit
@@ -62,29 +96,27 @@ else
 #Testing Folder is exists
 if (Test-Path -Path "$FullLocation")
 {
-    #Log/Event
-    Write-Host "Folder exists - Script will now close"
+    Write-Log -EntryType Warning -Message "Folder exists - Script will now close"
     Start-Sleep -Seconds 60
     Exit
 }
 Else
 {
-    #Log/Event
-    Write-Host "Folder does not exist - Success"
+    Write-Log -EntryType Information -Message "$FullLocation does not exist Script will continue - Success" 
+    
 }
 
 #Testing Share is exists
 if (Test-Path -Path "$ShareLocation")
 {
-    #Log/Event
-    Write-Host "Share exists - Script will now close"
+    Write-Log -EntryType Error -Message "ShareName Exists Script will now end"
     Start-Sleep -Seconds 60
     Exit
 }
 Else
 {
-    #Log/Event
-    Write-Host "Share does not exist - Success"
+    Write-Log -EntryType Information -Message "Share does not exist - Success" 
+    
 }
 
 #Creating Shares Privalages for that Folder 
@@ -143,3 +175,8 @@ New-SmbShare -Name $FolderName -cimsession $FileServer -ContinuouslyAvailable 0 
 #Confirm folder types for FSRM
 #Confirm quotas
 #add to dfs
+
+
+Stop-FileLog
+Stop-EventLogLog
+Stop-HostLog
