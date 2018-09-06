@@ -1,0 +1,4 @@
+#External Tools Guide
+
+https://github.com/mRemoteNG/mRemoteNG/wiki/Common-External-Tool-Configurations
+https://github.com/mRemoteNG/mRemoteNG/wiki/External-Tools
