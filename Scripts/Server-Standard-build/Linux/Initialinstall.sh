@@ -13,5 +13,5 @@ systemctl start docker
 systemctl enable docker
 yum install -y hyperv-daemons
 echo noop > /sys/block/sda/queue/scheduler
-hostnamectl set-hostname "CentOS-Docker"
+hostnamectl set-hostname "Some Random Name"
 shutdown -r now

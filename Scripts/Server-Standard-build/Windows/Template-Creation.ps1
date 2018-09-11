@@ -95,6 +95,9 @@ $Shortcut.Save()
 	Limit-EventLog -LogName Application -MaximumSize 20MB -OverflowAction OverwriteOlder -RetentionDays 30
 	Limit-EventLog -LogName System -MaximumSize 20MB -OverflowAction OverwriteOlder -RetentionDays 30
 	Limit-EventLog -LogName Security -MaximumSize 20MB -OverflowAction OverwriteOlder -RetentionDays 30
+
+	# Create custom Event Log 
+	New-EventLog –LogName Application –Source “Scripts”
 	
 	# Disable Computer Password Change
 	Set-ItemProperty -Path HKLM:SYSTEM\CurrentControlSet\Services\Netlogon\Parameters -Name DisablePasswordChange -Type DWORD -Value 1
