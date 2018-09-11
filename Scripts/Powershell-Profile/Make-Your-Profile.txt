@@ -1,8 +1,12 @@
 #REF https://www.howtogeek.com/126469/how-to-create-a-powershell-profile/
 
-mkdir C:\Support\transcripts\
+mkdir C:\Support\Transcripts
 mkdir C:\Support\Logs
 mkdir C:\Support\Scripts
+mkdir C:\Support\Info
+mkdir c:\Support\Temp
+mkdir c:\Support\Report
+
 
 New-Item –Path $Profile –Type File –Force
 notepad $Profile

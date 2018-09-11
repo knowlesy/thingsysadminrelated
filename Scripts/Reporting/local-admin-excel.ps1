@@ -54,7 +54,10 @@ Param(
 )
  
 Begin {
- 
+
+    if ( -Not (Test-Path -Path C:\temp ) ) {
+        New-Item -ItemType directory -Path C:\temp
+    }
     $OutputFile = Join-Path $OutputDir "LocalGroupMembers.csv"
     Write-Verbose "Script will write the output to $OutputFile folder"
     Add-Content -Path $OutPutFile -Value "ComputerName, LocalGroupName, Status, MemberType, MemberDomain, MemberName"
