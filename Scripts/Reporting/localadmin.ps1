@@ -1,7 +1,7 @@
 #https://clintboessen.blogspot.com/2018/08/powershell-list-local-administrators-on.html
 
 
-$serverlist = Get-Content C:\Users\clint-b\serverlist.txt
+$serverlist = Get-Content C:\Scripts\serverlist.txt
 
 foreach ($server in $serverlist)
     {

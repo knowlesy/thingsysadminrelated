@@ -1,0 +1,10 @@
+#REF https://www.howtogeek.com/126469/how-to-create-a-powershell-profile/
+
+mkdir C:\Support\transcripts\
+mkdir C:\Support\Logs
+mkdir C:\Support\Scripts
+
+New-Item –Path $Profile –Type File –Force
+notepad $Profile
+
+#COPY ps1 properties 
