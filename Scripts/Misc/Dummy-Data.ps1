@@ -14,6 +14,7 @@ function Start-FakeData {
 
     )
 
+    $filename = "$($Folder)\Logfile$((Get-Random 100000).tostring()).txt"
     $DaysToMove = ((Get-Random 120) - 60)
     $HoursToMove = ((Get-Random 48) - 24)
     $MinutesToMove = ((Get-Random 120) - 60)
@@ -25,7 +26,8 @@ function Start-FakeData {
     Set-Date -Adjust $Timespan | Out-Null
 
     # Create that file
-    Add-Content -Value $a -Path $FolderPath
+    Add-Content -Value $a -Path $filename
+
     # Now we REVERSE the Timespan by the exact same amount
     $TimeSpan = New-TimeSpan -Days (-$DaysToMove) -Hours (-$HoursToMove) -Minutes (-$MinutesToMove)
 
