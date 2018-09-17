@@ -3,7 +3,7 @@
 # needs to be ran elavated    
 
 function start-fakedata ($filename)
-      #$filename = "C:\temp\test"
+      #start-fakedata = "C:\temp\test"
 {
    $DaysToMove=((Get-Random 120) -60)
    $HoursToMove=((Get-Random 48) -24)
