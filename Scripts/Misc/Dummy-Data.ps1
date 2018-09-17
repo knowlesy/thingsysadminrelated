@@ -1,6 +1,10 @@
 #Ref https://blogs.technet.microsoft.com/heyscriptingguy/2018/09/15/using-powershell-to-create-a-folder-of-demo-data/ 
+#Ref https://mcpmag.com/articles/2016/04/07/powershell-functions-with-parameters.aspx
 # needs to be ran elavated    
-   
+
+function start-fakedata ($filename)
+      #$filename = "C:\temp\test"
+{
    $DaysToMove=((Get-Random 120) -60)
    $HoursToMove=((Get-Random 48) -24)
    $MinutesToMove=((Get-Random 120) -60)
@@ -18,3 +22,4 @@
    $TimeSpan=New-TimeSpan -Days (-$DaysToMove) -Hours (-$HoursToMove) -Minutes (-$MinutesToMove)
 
    Set-Date -Adjust ($Timespan) | Out-Null
+}
