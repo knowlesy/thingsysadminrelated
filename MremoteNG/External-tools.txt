@@ -2,3 +2,47 @@
 
 https://github.com/mRemoteNG/mRemoteNG/wiki/Common-External-Tool-Configurations
 https://github.com/mRemoteNG/mRemoteNG/wiki/External-Tools
+
+Application: Ping
+Filename: cmd
+Arguments: /c ping -t %HostName%
+
+Application: Traceroute
+Filename: cmd
+Arguments: /c set /P = | tracert %HostName%
+
+Application: Zenmap GUI
+Filename: C:\Program Files\Nmap\zenmap.exe
+Arguments: -p "Quick scan plus" -t %Hostname%
+
+Application: FileZilla FTP
+Filename: C:\Program Files\FileZilla FTP Client\filezilla.exe
+Arguments: ftp://%Username%:%Password%@%Hostname%
+
+Application: WinSCP
+Filename: C:\Program Files\WinSCP\WinSCP.exe
+Arguments: scp://%Username%:%Password%@%Hostname%/
+
+Application: FileZilla SFTP
+Filename: C:\Program Files\FileZilla FTP Client\filezilla.exe
+Arguments: sftp://%Username%:%Password%@%Hostname%
+
+Application: Internet Explorer
+Filename: Internet Explorer\IEXPLORE.EXE
+Arguments: %HostName%
+
+Application: Windows Computer Manager
+Filename: C:\WINDOWS\system32\compmgmt.msc
+Arguments: /Computer=%HostName%
+
+Application: [TOOL] Command Prompt (using SysInternals PSEXEC)
+Filename: cmd
+Arguments: /k %tools%\psexec.exe \\%hostname% cmd.exe
+
+Application: [TOOL] Logged-on users (using SysInternals psloggedon.exe)
+Filename: cmd
+Arguments: /k %tools%\psloggedon.exe \\%hostname%
+
+Application: Posh Enter-PSSession
+Filename: %WINDIR%\system32\WindowsPowerShell\v1.0\PowerShell.exe
+Arguments: -NoExit -Command "$password = ConvertTo-SecureString '%PASSWORD%' -AsPlainText -Force; $cred = New-Object System.Management.Automation.PSCredential -ArgumentList @('%Domain%\%Username%', $password); Enter-PSSession -ComputerName %Hostname% -Credential $cred"
