@@ -6,6 +6,7 @@ yum install bash-completion bash-completion-extras
 locate bash-completion.sh
 source /etc/profile.d/bash_completion.sh  
 yum install wget
+yum install dnsutils
 yum install p7zip
 yum install nano
 yum -y install docker
