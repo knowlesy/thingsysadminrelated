@@ -1,6 +1,7 @@
 #REF https://ghostpi.pro/cloudflare-ddns-raspberry-pi/
 # use code below errors on main page for final script 
-
+# crontab
+# */59 * * * * /scripts/cfddns.sh >/dev/null >> /logs/cloud.log 2>&1
 
 #!/bin/sh
 
