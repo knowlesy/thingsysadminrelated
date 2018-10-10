@@ -1,76 +1,54 @@
-#REF 
+#REF
 # https://www.theaccessgroup.com/hosting/resources/our-blog/getting-a-list-of-snapshots-in-vsphere-using-powercli/
 # http://www.checkyourlogs.net/?p=34783
+# https://pastebin.com/WJRpcbnj
 
-###Variables###
+$vcserver = 'server'
+$toAddr = "too@who.com"
+$fromAddr = "from@who.com"
+$smtpsrv = "server"
+$date = Get-Date
 
-#Vcenter Server
-$vcsbox = 'servername'
-#CSV export of location
-$exportlocation = 'D:\test.csv'
-#Sets SMTP Server
-$smtpServer = "<smtp-server>"
-#Sets from email
-$smtpFrom = "<scripts-server>-noemail@<domain>"
-#Sets Date
-$emailDate = Get-Date -Format "dd/MM/yyyy"
-#Sets to whom
-$toRecipients = "<user-email>" 
-#Sets subject
-$messageSubject = "VM Snapshot Report - $emailDate"
+#$expired = get-date -date $(get-date).adddays(-7) 
 
-
+$attachmentPref = $true
 
 #Imports powercli
 Get-Module -ListAvailable VMware.VimAutomation.* | Import-Module -ErrorAction SilentlyContinue
 
-#connects to VC server 
-Connect-VIServer -Server $vcsbox
-
-#Exports to csv
-#get-vm | get-snapshot | Select-Object vm, name, description, created, sizegb | Export-Csv $exportlocation
-
-#Email report
- $vmsnapshots = get-vm | get-snapshot | ConvertTo-Html -Title "List of snapshots" -Fragment -Property vm, name, description, created, sizegb
-
-#foreach ($snap in $vmsnapshots )
-
-#{
- #   $now = Get-Date -format "yyyy-MM-dd-HH:mm"  
+#connects to server 
+Connect-VIServer -Server $vcserver 
+$VMsWithSnaps = @(Get-VM | Get-Snapshot | Select-Object VM, Name, Created, Description)
+# Make sure the body isn't empty. If it is, skip this part and exit the script.
+if ($VMsWithSnaps -ne $null) {
+    $body = @("
+        <center><table border=1 width=50 % cellspacing=0 cellpadding=8 bgcolor=Black cols=3>
+        <tr bgcolor=White><td>Virtual Machine</td><td>Snapshot</td><td>Description</td><td>Creation Time</td></tr>")
 
 
-#}
+    $i = 0
+    do {
+        
+        
+        if ($i % 2) {$body += "<tr bgcolor=#D2CFCF><td>$($VMsWithSnaps[$i].VM)</td><td>$($VMsWithSnaps[$i].Name)</td><td>$($VMsWithSnaps[$i].Description)</td><td>$($VMsWithSnaps[$i].Created)</td></tr>"; $i++}
+        else {$body += "<tr bgcolor=#EFEFEF><td>$($VMsWithSnaps[$i].VM)</td><td>$($VMsWithSnaps[$i].Name)</td><td>$($VMsWithSnaps[$i].Description)</td><td>$($VMsWithSnaps[$i].Created)</td></tr>"; $i++}
+    }
+    while ($VMsWithSnaps[$i] -ne $null)
 
-
-$message = New-Object System.Net.Mail.MailMessage 
-$message.From = $smtpFrom
-foreach ($toRecipient in $toRecipients) {
-    $message.To.Add($toRecipient)
+    $body += "</table></center>"
+    # Send email alerting recipients about snapshots.
+    if ($attachmentPref) {
+        $VMsWithSnaps | Export-CSV "SnapshotReport $($date.month)-$($date.day)-$($date.year).csv"
+        Send-MailMessage -To "$toAddr" -From "$fromAddr" -Subject "Automated Daily Snapshot Report $($date.month)-$($date.day)-$($date.year)" -Body "$body" -Attachments "SnapshotReport $($date.month)-$($date.day)-$($date.year).csv" -SmtpServer "$smtpsrv" -BodyAsHtml
+        Remove-Item "SnapshotReport $($date.month)-$($date.day)-$($date.year).csv"
+    }
+    Else {
+        Send-MailMessage -To "$toAddr" -From "$fromAddr" -Subject "Automated Daily Snapshot Report $($date.month)-$($date.day)-$($date.year)" -Body "$body" -SmtpServer "$smtpsrv" -BodyAsHtml
+    }
 }
-$smtp = New-Object Net.Mail.SmtpClient($smtpServer)
-$att = New-Object Net.Mail.Attachment("$Directory\BackupHost.Log")
-$message.Subject = $messageSubject
-$message.IsBodyHTML = $true
-#Using the previous variables / arrays it builds a report 
-$message.Body = "
-<html>
-    <head>
-        <style type=text/css>
-            body 
-            { 
-                font-family:Helvetica,Verdana 
-            }`r`n
-            td 
-            { 
-                font-size:10pt; 
-            }
-        </style>
-    </head>
-<body>
-<center>
- $vmsnapshots
-</body></html>"
-$message.Attachments.Add($att)
-$smtp.Send($message)
-Remove-Variable message 
-$att.Dispose()
+else {
+    Send-MailMessage -To "$toAddr" -From "$fromAddr" -Subject "Automated Daily Snapshot Report $($date.month)-$($date.day)-$($date.year) (No Snapshots Detected)" -Body "" -SmtpServer "$smtpsrv"
+}
+
+Disconnect-VIServer -server $vcserver  -Confirm:$false 
+exit
