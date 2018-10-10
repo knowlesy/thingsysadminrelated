@@ -27,9 +27,19 @@ Get-Module -ListAvailable VMware.VimAutomation.* | Import-Module -ErrorAction Si
 #connects to VC server 
 Connect-VIServer -Server $vcsbox
 
-#Original
-#get-vm | get-snapshot | Select-Object vm, name, description, created, sizegb | Export-Csv D:\test.csv
+#Exports to csv
+#get-vm | get-snapshot | Select-Object vm, name, description, created, sizegb | Export-Csv $exportlocation
 
+#Email report
+ $vmsnapshots = get-vm | get-snapshot | ConvertTo-Html -Title "List of snapshots" -Fragment -Property vm, name, description, created, sizegb
+
+#foreach ($snap in $vmsnapshots )
+
+#{
+ #   $now = Get-Date -format "yyyy-MM-dd-HH:mm"  
+
+
+#}
 
 
 $message = New-Object System.Net.Mail.MailMessage 
@@ -58,14 +68,7 @@ $message.Body = "
     </head>
 <body>
 <center>
-<table width=95%>
-<tr>
-<th>Connected-Backed-Up</th><th>Connected-Backup-Failed</th><th>Disconnected</th><th>NotResponding</th><th>Maintenance</th>
-</tr>
-<tr>
-<td bgcolor='Green' valign='top'>$connectedhostsbackedup</td><td bgcolor='Orange' valign='top'>$connectedhostsbutfailed</td><td bgcolor='Red' valign='top'>$disconnectedhosts</td><td bgcolor='Red' valign='top'>$notrespondinghosts</td><td bgcolor='Red' valign='top'>$maintenancehosts</td>
-</tr>
-</table>
+ $vmsnapshots
 </body></html>"
 $message.Attachments.Add($att)
 $smtp.Send($message)

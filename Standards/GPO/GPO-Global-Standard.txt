@@ -1,0 +1,80 @@
+	• <WHERE>-<WHAT>-<Description>-<local/site>
+		○ <WHERE>
+			§ Global
+			§ Region
+		○ <WHAT>
+			§ Server
+			§ User
+			§ Computer
+			§ ALL
+		○ <Description>
+			§ Briefly what it does
+			§ Spaces with _
+		○ <local/site>
+			§ Local
+				□  being country with country code 
+			§ Site
+				□ Being specific country code  
+			§ Default
+				□ Only used if GLOBAL is used
+
+
+Example
+	• Global-Server-Standard_Restricted_Groups-Default
+	• EMEA-Server-Standard_Restricted_Groups-UK
+	• EMEA-Server-Standard_Restricted_Groups-<SITECODE>
+
+
+Default OU is as follows
+	• OU: Country
+		○ GPO: Global-ALL-Software_Invenory-Default
+		○ GPO: Global-ALL-IE11-Default
+		○ OU: Location/Entity
+			§ Computers
+				□ GPO: Global-Computers-Restricted_Users-Default
+				□ GPO: <REGION>-Computers-Restricted_Users-<Country>
+				□ GPO: Global-Computers-Google_Chrome-Default
+				□ OU: Service Machines
+					® Machines for 24x7 and their unique applicable gpos assigned to them
+				□ OU: Windows 10 Machines
+					® GPO: Global-Computer-Office2016-Default
+					® GPO: <REGION>-Computers-Standard_Restricted_Groups-<COUNTRY>
+					® GPO: Global-Computer-W10-Default
+					® GPO: Global-Computer-Encryption-Default
+					® OU: Desktops
+						® GPO: Global-Computer-W10_Desktop-Default
+						® Additional OU/GPO….
+					® OU: Laptops
+						® GPO: GPO: Global-Computer-W10_Laptop-Default
+						® Additional OU/GPO….
+				□ OU: Windows 7 Machines
+					® GPO: Global-Computer-Office2016-Default
+					® GPO: <REGION>-Computers-Standard_Restricted_Groups-<COUNTRY>
+					® GPO: Global-Computer-W7-Default
+					® GPO: Global-Computer-Encryption-Default
+					® OU: Desktops
+						◊ GPO: Global-Computer-W7_Desktop-Default
+						◊ Additional OU/GPO….
+					® OU: Laptops
+						◊ GPO: GPO: Global-Computer-W7_Laptop-Default
+						◊ Additional OU/GPO….
+			§ Groups
+				□ Additional OU/GPO….
+			§ Servers
+				□ GPO: Global-Server-Standard_Restricted_Groups-Default
+				□ GPO: Global-Server-Standard_Settings-Defaut
+					® Additional if required Country GPO
+					® Additional if required Site Code GPO
+				□ GPO: EMEA_NSA-Server-SCCM_WSUS-GLOBAL
+				□ Additional OU/GPO….
+			§ Services
+				□ Additional OU/GPO….
+			§ Users
+				□ GPO: Global-User_OneDrive_FolderRedirection-Default
+				□ GPO: Global-User-Office2016-Default
+					® Additional if required Country GPO
+					® Additional if required Site Code GPO
+				□ GPO: Global-User-Standard-Default
+					® Additional if required Country GPO
+					® Additional if required Site Code GPO
+                □ Additional OU/GPO….
