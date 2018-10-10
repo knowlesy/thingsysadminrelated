@@ -65,7 +65,6 @@ Default OU is as follows
 				□ GPO: Global-Server-Standard_Settings-Defaut
 					® Additional if required Country GPO
 					® Additional if required Site Code GPO
-				□ GPO: EMEA_NSA-Server-SCCM_WSUS-GLOBAL
 				□ Additional OU/GPO….
 			§ Services
 				□ Additional OU/GPO….
