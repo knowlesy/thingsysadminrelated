@@ -8,10 +8,10 @@ $toAddr = "too@who.com"
 $fromAddr = "from@who.com"
 $smtpsrv = "server"
 $date = Get-Date
-
+$attachmentPref = $true
 #$expired = get-date -date $(get-date).adddays(-7) 
 
-$attachmentPref = $true
+
 
 #Imports powercli
 Get-Module -ListAvailable VMware.VimAutomation.* | Import-Module -ErrorAction SilentlyContinue
