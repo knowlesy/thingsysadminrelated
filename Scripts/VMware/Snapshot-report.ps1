@@ -38,16 +38,16 @@ if ($VMsWithSnaps -ne $null) {
     $body += "</table></center>"
     # Send email alerting recipients about snapshots.
     if ($attachmentPref) {
-        $VMsWithSnaps | Export-CSV "SnapshotReport $($date.month)-$($date.day)-$($date.year).csv"
-        Send-MailMessage -To "$toAddr" -From "$fromAddr" -Subject "Automated Daily Snapshot Report $($date.month)-$($date.day)-$($date.year)" -Body "$body" -Attachments "SnapshotReport $($date.month)-$($date.day)-$($date.year).csv" -SmtpServer "$smtpsrv" -BodyAsHtml
-        Remove-Item "SnapshotReport $($date.month)-$($date.day)-$($date.year).csv"
+        $VMsWithSnaps | Export-CSV "$vcserver SnapshotReport $($date.month)-$($date.day)-$($date.year).csv"
+        Send-MailMessage -To "$toAddr" -From "$fromAddr" -Subject "$vcserver Automated Daily Snapshot Report $($date.month)-$($date.day)-$($date.year)" -Body "$body" -Attachments "$vcserver SnapshotReport $($date.month)-$($date.day)-$($date.year).csv" -SmtpServer "$smtpsrv" -BodyAsHtml
+        Remove-Item "$vcserver SnapshotReport $($date.month)-$($date.day)-$($date.year).csv"
     }
     Else {
-        Send-MailMessage -To "$toAddr" -From "$fromAddr" -Subject "Automated Daily Snapshot Report $($date.month)-$($date.day)-$($date.year)" -Body "$body" -SmtpServer "$smtpsrv" -BodyAsHtml
+        Send-MailMessage -To "$toAddr" -From "$fromAddr" -Subject "$vcserver Automated Daily Snapshot Report $($date.month)-$($date.day)-$($date.year)" -Body "$body" -SmtpServer "$smtpsrv" -BodyAsHtml
     }
 }
 else {
-    Send-MailMessage -To "$toAddr" -From "$fromAddr" -Subject "Automated Daily Snapshot Report $($date.month)-$($date.day)-$($date.year) (No Snapshots Detected)" -Body "" -SmtpServer "$smtpsrv"
+    Send-MailMessage -To "$toAddr" -From "$fromAddr" -Subject "$vcserver Automated Daily Snapshot Report $($date.month)-$($date.day)-$($date.year) (No Snapshots Detected)" -Body "No Snapshots" -SmtpServer "$smtpsrv"
 }
 
 Disconnect-VIServer -server $vcserver  -Confirm:$false 
