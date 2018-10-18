@@ -48,6 +48,6 @@ $clean = {
   Start-Job $zero
 
 
-  wait-job -name ss64 -timeout 300
+  wait-job -name zero -timeout 300
 
   start-job $clean
