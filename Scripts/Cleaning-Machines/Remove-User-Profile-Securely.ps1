@@ -37,7 +37,7 @@ $zero = {
 
 
 $clean = {
-     C:\temp\tmp\tmp2\sdelete64.exe -z c:
+    C:\temp\tmp\tmp2\sdelete64.exe -z -q -c -p 3 c:
     Robocopy $final $temp /mir /r:1 /w:1 /mt:10 
     Remove-Item –path C:\Support -Recurse
     wevtutil el | Foreach-Object {wevtutil cl “$_”}
