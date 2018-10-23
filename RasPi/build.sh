@@ -22,4 +22,7 @@ sudo su
 curl -sSL https://install.pi-hole.net | bash
 shutdown -r now
 sudo su
-apt-get install openvpn
+curl -L https://install.pivpn.io | bash
+sudo su
+apt-get update
+apt-get upgrade
