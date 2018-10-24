@@ -1,0 +1,1 @@
+Get-ADUser -SearchBase “OU=x,OU=domain,ou=local” -Filter * -Properties SamAccountName, legacyExchangeDN | Select-Object SamAccountName, legacyExchangeDN | Export-CSV D:\UserExport.csv -NoTypeInformation
