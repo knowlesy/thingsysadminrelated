@@ -6,6 +6,7 @@ apt-get update
 apt-get upgrade
 apt-get dist-upgrade
 rpi-update
+apt-get install sshpass
 apt-get install wget
 apt-get install dnsutils
 apt-get install p7zip
