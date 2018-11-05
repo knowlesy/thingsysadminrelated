@@ -1,0 +1,1 @@
+Import-Csv .\StaffForDistGroup.csv | ForEach {Add-DistributionGroupMember -Identity $_.distributiongroup -Member $_.displayname}
