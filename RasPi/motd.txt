@@ -1,6 +1,5 @@
 #source http://pingbin.com/2012/12/raspberry-pi-awesome-custom-motd/
-#source https://github.com/yboetz/motd
-#to set run following command
+# https://github.com/yboetz/motd
 # sudo nano /home/pi/.bash_profile
 
 let upSeconds="$(/usr/bin/cut -d. -f1 /proc/uptime)"
@@ -18,10 +17,10 @@ echo "$(tput setaf 2)
 '. \ ' ' / .'   `uname -srmo`$(tput setaf 1)
 .~ .~~~..~.
 : .~.'~'.~. :   Uptime.............: ${UPTIME}
-~ (   ) (   ) ~  Memory.............: `cat /proc/meminfo | grep MemFree | awk {'print $2'}`kB (Free) / `cat /proc/meminfo | grep MemTotal | awk {'print $2'}`kB (Total)
+~ (   ) (   ) ~  Memory.............: `cat /proc/meminfo | grep MemFree | awk {'print $2/1024'}`MB (Free) / `cat /proc/meminfo | grep MemTotal | awk {'print $2/1024'}`MB (Total)
 ( : '~'.~.'~' : ) Load Averages......: ${one}, ${five}, ${fifteen} (1, 5, 15 min)
 ~ .~ (   ) ~. ~  Running Processes..: `ps ax | wc -l | tr -d " "`
-(  : '~' :  )   IP Addresses.......: `hostname -I | awk '{print $1}' | /usr/bin/cut -d " " -f 1` and `wget -q -O - http://icanhazip.com/ | tail`
+(  : '~' :  )   IP Addresses.......: Local`hostname -I | awk '{print $1}' | /usr/bin/cut -d " " -f 1` and Public `wget -q -O - http://icanhazip.com/ | tail`
 '~ .~~~. ~'    Vpn IP............: yourdomain.com = `dig yourdomain.com +short`
 '~'           Weather............: `curl -s "http://rss.accuweather.com/rss/liveweather_rss.asp?metric=1&locCode=EUR|UK|UK001|NEWCASTLEUPONTYNE|" | sed -n '/Currently:/ s/.*: \(.*\): \([0-9]*\)\([CF]\).*/\2°\3, \1/p'`
 $(tput sgr0)"
