@@ -75,7 +75,7 @@ undim="\e[0m"
 
 # disk usage: ignore zfs, squashfs & tmpfs
 mapfile -t dfs < <(df -H -x zfs -x squashfs -x tmpfs -x devtmpfs --output=target,pcent,size | tail -n+2)
-printf "\ndisk usage:\n"
+printf "\nDisk Usage:\n"
 
 for line in "${dfs[@]}"; do
     # get disk usage
