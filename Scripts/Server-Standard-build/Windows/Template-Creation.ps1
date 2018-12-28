@@ -198,8 +198,7 @@ Disable-ScheduledTask -TaskName "microsoft\windows\DiskDiagnostic\Microsoft-Wind
 %windir%\microsoft.net\framework64\v4.0.30319\ngen.exe update /force /queue
 
 "Clean event logs"
-(Get-WinEvent -ListLog *).logname | ForEach-Object {[System.Diagnostics.Eventing.Reader.EventLogSession]::GlobalSession.ClearLog(“$psitem”)}
-Wevtutil el | ForEach { wevtutil cl “$_”}
+Clear-eventlog -log application, system, security
 
 "Empty Recycle Bin"
 Clear-RecycleBin -Confirm:$false #ps 5.1 and above only 
