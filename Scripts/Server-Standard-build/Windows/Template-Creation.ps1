@@ -38,10 +38,10 @@ Invoke-WebRequest -UseBasicParsing -Uri $NewPath -OutFile $OldPath -Verbose
 Expand-Archive -LiteralPath $OldPath -DestinationPath $BaseDir -Force
 
 "Create BGINFO"
+#Remember to customise your bginfo file
 "C:\Support\Build-Files\Sysinternals\Bginfo64.exe C:\Support\Build-Files\Sysinternals\BG-Default.bgi /timer:0 /nolicprompt /silent" | out-file C:\Support\Scripts\bgi.cmd
 
 "Make Shortcuts"
-
 $WshShell = New-Object -comObject WScript.Shell
 $Shortcut = $WshShell.CreateShortcut("C:\Users\Public\Desktop\Logoff.lnk")
 $Shortcut.TargetPath = "C:\Windows\System32\logoff.exe"
@@ -79,20 +79,20 @@ fsutil.exe 8dot3name set 1
 gwmi Win32_Volume -Filter "IndexingEnabled=$true" | swmi -Arguments @{IndexingEnabled = $false}
 
 # Change DVD drive letter
-# gwmi Win32_Volume -Filter "DriveType = '5'" | swmi -Arguments @{DriveLetter = 'Z:'}
+gwmi Win32_Volume -Filter "DriveType = '5'" | swmi -Arguments @{DriveLetter = 'Z:'}
 
 # Enable RDP for Admins
 cscript C:\Windows\System32\Scregedit.wsf /ar 0
 cscript C:\Windows\System32\Scregedit.wsf /cs 0
 
 #Disable System Restore on C: and delete all snapshots
-# disable-computerrestore -drive c:\
-# vssadmin delete shadows /All /Quiet
+#disable-computerrestore -drive c:\ # not supported on 2016
+vssadmin delete shadows /All /Quiet
 
 # Disable CEIP
 Set-ItemProperty 'HKLM:\SOFTWARE\Microsoft\SQMClient\Windows' CEIPEnable 0
 
-# Set Eventlog Size to 20mb and retention to 30 days
+# Set Eventlog Size to 30mb and retention to 30 days
 Limit-EventLog -LogName Application -MaximumSize 30MB -OverflowAction OverwriteOlder -RetentionDays 30
 Limit-EventLog -LogName System -MaximumSize 30MB -OverflowAction OverwriteOlder -RetentionDays 30
 Limit-EventLog -LogName Security -MaximumSize 30MB -OverflowAction OverwriteOlder -RetentionDays 30
@@ -140,6 +140,9 @@ powercfg.exe -change -monitor-timeout-ac 0
 # No System Failure Auto-Restart
 #gwmi Win32_OSRecoveryConfiguration -EnableAllPrivileges | swmi -Arguments @{AutoReboot=$false}
 
+# System Failure Auto-Restart
+gwmi Win32_OSRecoveryConfiguration -EnableAllPrivileges | swmi -Arguments @{AutoReboot=$true}
+
 # Move Memory Dump File
 #Set-ItemProperty -Path HKLM:SYSTEM\CurrentControlSet\Control\CrashControl -Name 'DedicatedDumpFile' -Value 'X:\MEMORY.DMP'
 #gwmi Win32_OSRecoveryConfiguration -EnableAllPrivileges | swmi -Arguments @{DebugFilePath='X:\MEMORY.DMP'}
@@ -156,11 +159,8 @@ Enable-NetFirewallRule -DisplayGroup 'Windows Remote Management'
 # Allow ICMP Traffic
 netsh firewall set icmpsetting 8
 
-
-
 "Disabling Scheduled Tasks..."
 # DISABLE SCHEDULED TASKS
-
 Disable-ScheduledTask -TaskName "microsoft\windows\Application Experience\ProgramDataUpdater"
 Disable-ScheduledTask -TaskName "microsoft\windows\UPnP\UPnPHostConfig"
 Disable-ScheduledTask -TaskName "microsoft\windows\WDI\ResolutionHost"
@@ -195,3 +195,19 @@ Disable-ScheduledTask -TaskName "microsoft\windows\DiskDiagnostic\Microsoft-Wind
 "dotNet Optimisation"
 %windir%\microsoft.net\framework\v4.0.30319\ngen.exe update /force /queue
 %windir%\microsoft.net\framework64\v4.0.30319\ngen.exe update /force /queue
+
+"Clean event logs"
+(Get-WinEvent -ListLog *).logname | ForEach-Object {[System.Diagnostics.Eventing.Reader.EventLogSession]::GlobalSession.ClearLog(“$psitem”)}
+Wevtutil el | ForEach { wevtutil cl “$_”}
+
+"Empty Recycle Bin"
+$RecBin.Items() | % {Remove-Item $_.Path -Recurse -Confirm:$false}
+
+"Running Disk Cleanup"
+CLEANMGR /lowdisk
+
+"Performing Defrag"
+defrag /c /o
+
+"Zero'ing Disk"
+C:\Support\Build-Files\Sysinternals\sdelete64.exe -z c:
