@@ -202,7 +202,7 @@ Disable-ScheduledTask -TaskName "microsoft\windows\DiskDiagnostic\Microsoft-Wind
 Wevtutil el | ForEach { wevtutil cl “$_”}
 
 "Empty Recycle Bin"
-$RecBin.Items() | % {Remove-Item $_.Path -Recurse -Confirm:$false}
+Clear-RecycleBin -Confirm:$false #ps 5.1 and above only 
 
 "Running Disk Cleanup"
 CLEANMGR /lowdisk
