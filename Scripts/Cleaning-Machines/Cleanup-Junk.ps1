@@ -7,7 +7,7 @@
 
 ###########What It Does###############
 #Clears Event Log
-#Set Eventlog size to 20MB / 30days
+#Set Eventlog size to 30MB / 30days
 #Cleans C:\Windows\SoftwareDistribution\
 #Cleans Error Reporting C:\ProgramData\Microsoft\Windows\WER
 #Cleans C:\Windows\Temp\
@@ -127,7 +127,7 @@ $Before
 Clear-eventlog -log application, system, security
 gci $Env:windir\logs\CBS -rec | rm -rec -for
 
-# Set Eventlog Size to 20mb and retention to 30 days
+# Set Eventlog Size to 30mb and retention to 30 days
 Limit-EventLog -LogName Application -MaximumSize 30MB -OverflowAction OverwriteOlder -RetentionDays 30
 Limit-EventLog -LogName System -MaximumSize 30MB -OverflowAction OverwriteOlder -RetentionDays 30
 Limit-EventLog -LogName Security -MaximumSize 30MB -OverflowAction OverwriteOlder -RetentionDays 30
