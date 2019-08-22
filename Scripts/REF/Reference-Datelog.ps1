@@ -1,0 +1,1 @@
+$date = Get-Date -Format yyyy-MM-dd-%H-mm
