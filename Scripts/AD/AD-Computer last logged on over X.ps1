@@ -1,0 +1,1 @@
+Get-ADComputer  -Properties * -Filter *| where { $_.lastlogondate -lt (get-date).AddDays(-60) } | Select NAme, lastlogondate, CanonicalName, OperatingSystem, Enabled | Export-Csv C:\Temp\adcomputers.csv -Append
