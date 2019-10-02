@@ -1,0 +1,59 @@
+{
+    // Place your snippets for powershell here. Each snippet is defined under a snippet name and has a prefix, body and
+    // description. The prefix is what is used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+    // Ref https://github.com/fatherjack/vscode-snippets/blob/master/powershell.json
+    //REF https://gist.github.com/rkeithhill/60eaccf1676cf08dfb6f
+    //REF https://rkeithhill.wordpress.com/2015/09/12/powershell-snippets-for-visual-studio-code/
+    //
+    "Help because Get-Help doesn't have ShowWindow": {
+        "prefix": "_help",
+        "body": [
+            "get-help ${0} -full | clip ; \\$file = \"C:\\temp\\hlp${0}.txt\"; New-Item -ItemType File -Path \\$file -Force; set-content -Path \\$file -Value \\$(Get-Clipboard); ii \\$file"
+        ],
+        "description": "Lets you enter the name of a command and paste the content into Notepad for viewing."
+    },
+    "For Each statement": {
+        "prefix": "_for",
+        "body": [
+            "foreach (${$variable} in ${$variable}) {",
+            "\t$0",
+            "}"
+        ],
+        "description": "For Each statement"
+    },
+    "If statement": {
+        "prefix": "_if",
+        "body": [
+            "if (${$variable}) {",
+            "\t$0",
+            "}"
+        ],
+        "description": "If statement"
+    },
+    "If Else statement": {
+        "prefix": "_elseif",
+        "body": [
+            "if (${$variable}) {",
+            "\t$0",
+            "}",
+            "else {",
+            "\t$0",
+            "}"
+        ],
+        "description": "If Else statement"
+    },
+    "Try catch": {
+        "prefix": "_try",
+        "body": [
+            "try {",
+            "\t${_}",
+            "}",
+            "catch {",
+            "\t# Exception is stored in the automatic variable $_",
+            "$ErrorMessage = $_.Exception.Message",
+            "$FailedItem = $_.Exception.ItemName",
+            "}"
+        ],
+        "description": "Try catch"
+    }
+}
