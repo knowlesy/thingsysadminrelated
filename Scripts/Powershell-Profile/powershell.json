@@ -55,5 +55,18 @@
             "}"
         ],
         "description": "Try catch"
-    }
+    },
+    	    "User Confirmation with No Log": {
+        "prefix": "_User_Confirm",
+        "body": [
+            "$User_confirmation = Read-Host 'Do you wish to proceed y/n'",
+            "if ($User_confirmation -eq 'y') {",
+            "\n",
+			"}",
+            "else {",
+            "\n",
+            "}"
+        ],
+        "description": "User confirmation With No Log"
+    },
 }
