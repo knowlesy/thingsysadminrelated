@@ -49,9 +49,9 @@
             "\t${_}",
             "}",
             "catch {",
-            "\t# Exception is stored in the automatic variable $_",
-            "$ErrorMessage = $_.Exception.Message",
-            "$FailedItem = $_.Exception.ItemName",
+            "\t# Exception is stored in the automatic variable $$_",
+            "$$ErrorMessage = $$_.Exception.Message",
+            "$$FailedItem = $$_.Exception.ItemName",
             "}"
         ],
         "description": "Try catch"
