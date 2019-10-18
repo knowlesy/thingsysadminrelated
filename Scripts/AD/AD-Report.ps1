@@ -96,10 +96,9 @@ $date = Get-Date -Format yyyy-MM-dd-HH-mm
 $logcreated = Get-Date
 $Log_Location = 'C:\Temp\ADReport\'
 $Outputlocation = ($Log_Location)
-$outputpath = ($Outputlocation  + $date)
+$outputpath = ($Outputlocation + $date)
 $logpath = ($Log_Location + $logcreated.ToString("yyyy-MM-dd_HH-mm") + "-AD_Report.log")
 $Log_Location_test = Test-Path -Path $Log_Location -ErrorAction $ErrorActionPreference
-
 
 #Forest
 $ForestInfo = Get-ADForest
@@ -376,7 +375,7 @@ catch {
 ###########################################  AD Forrest  ###########################################
 write-log "###########################################  AD Forrest  ###########################################"
 try {
-    $SectionLog= ($outputpath + '-AD-Forrest_Report.txt')
+    $SectionLog = ($outputpath + '-AD-Forrest_Report.txt')
     write-log ('Dedicated Log output to: ' + $SectionLog)
     #Forrest name
     Write-Log "Forrest Name: $forest"
@@ -393,10 +392,10 @@ try {
         Windows2000Forest { write-log "Forest Functional Level is Windows 2000"; $FFVOut = "Forest Functional Level is Windows 2000" }
         Windows2003Forest { write-log "Forest Functional Level is Windows Server 2003"; $FFVOut = "Forest Functional Level is Windows Server 2003" }
         Windows2008Forest { write-log "Forest Functional Level is Windows Server 2008"; $FFVOut = "Forest Functional Level is Windows Server 2008" }
-        Windows2008R2Forest { write-log "Forest Functional Level is Windows Server 2008 R2"; $FFVOut = "Forest Functional Level is Windows Server 2008 R2"}
-        Windows2012Forest { write-log "Forest Functional Level is Windows Server 2012"; $FFVOut = "Forest Functional Level is Windows Server 2012"  }
+        Windows2008R2Forest { write-log "Forest Functional Level is Windows Server 2008 R2"; $FFVOut = "Forest Functional Level is Windows Server 2008 R2" }
+        Windows2012Forest { write-log "Forest Functional Level is Windows Server 2012"; $FFVOut = "Forest Functional Level is Windows Server 2012" }
         Windows2012R2Forest { write-log "Forest Functional Level is Windows Server 2012 R2"; $FFVOut = "Forest Functional Level is Windows Server 2012 R2" }
-        Windows2016Forest { write-log "Forest Functional Level is Windows Server 2016"; $FFVOut = "Forest Functional Level is Windows Server 2016"  }
+        Windows2016Forest { write-log "Forest Functional Level is Windows Server 2016"; $FFVOut = "Forest Functional Level is Windows Server 2016" }
         default { write-log "Unknown Forest Functional Level: $ffl"; $FFVOut = "Unknown Forest Functional Level: $ffl" }
    
     }
@@ -406,7 +405,7 @@ try {
     
         13 { Write-Log ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows 2000 Server' ); $ADSVOut = ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows 2000 Server' ) }
         30 { Write-Log ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2003'  ); $ADSVOut = ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2003'  ) }
-        31 { Write-Log ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2003 R2' ); $ADSVOut = ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2003 R2' )  }
+        31 { Write-Log ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2003 R2' ); $ADSVOut = ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2003 R2' ) }
         44 { Write-Log ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2008' ); $ADSVOut = ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2008' ) }
         47 { Write-Log ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2008 R2' ); $ADSVOut = ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2008 R2' ) }
         56 { Write-Log ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2012' ); $ADSVOut = ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2012' ) }
@@ -417,8 +416,8 @@ try {
     }
     Write-Output $ADSVOut >> $SectionLog
     #list all domains in forrest 
-    $allDomains| Sort-Object | ForEach-Object {$_ } >> $SectionLog
-    $allDomains | ForEach-Object {Write-Log " Domains in this forrest $_"}
+    $allDomains | Sort-Object | ForEach-Object { $_ } >> $SectionLog
+    $allDomains | ForEach-Object { Write-Log " Domains in this forrest $_" }
     #list default upn suffix
     Write-Log "UPN Suffix $UPNsuffix"
     Write-Output "UPN Suffix $UPNsuffix" >> $SectionLog
@@ -464,7 +463,7 @@ try {
     if ( $UPNSuffix.Count -ne 0 ) {
         
         $UPNsuffix | Sort-Object | ForEach-Object { Write-log $_ }
-        $UPNsuffix | Sort-Object | ForEach-Object {$_ } >> $SectionLog
+        $UPNsuffix | Sort-Object | ForEach-Object { $_ } >> $SectionLog
     }
         
     else {
@@ -486,11 +485,11 @@ try {
     $enterpriseAdminsNo = Get-ADGroup -Server $forest -Identity $entGroupID | Get-ADGroupMember -Recursive 
     Write-Log ('Total number of Enterprise Administrators : ' + ($enterpriseAdminsNo | Measure-Object).Count)
     Write-Output ('Total number of Enterprise Administrators : ' + ($enterpriseAdminsNo | Measure-Object).Count) >> $SectionLog
-    $enterpriseAdminsNo | ForEach-Object {write-log ('Enterprise Sam Account Name: ' + $_.samaccountname)} 
-    $enterpriseAdminsNo | ForEach-Object {('Enterprise Sam Account Name: ' + $_.samaccountname) >> $SectionLog} 
-    $enterpriseAdminsNo | ForEach-Object {Get-ADUser $_ | Select-Object *} | Export-Csv ($outputpath + '-Enterprise-Admins.csv') -Append
+    $enterpriseAdminsNo | ForEach-Object { write-log ('Enterprise Sam Account Name: ' + $_.samaccountname) } 
+    $enterpriseAdminsNo | ForEach-Object { ('Enterprise Sam Account Name: ' + $_.samaccountname) >> $SectionLog } 
+    $enterpriseAdminsNo | ForEach-Object { Get-ADUser $_ | Select-Object * } | Export-Csv ($outputpath + '-Enterprise-Admins.csv') -Append
 
-    }
+}
 catch {
     # Exception is stored in the automatic variable $_
     $ErrorMessage = $_.Exception.Message
@@ -501,7 +500,7 @@ catch {
 
 ###########################################  Partitions  ###########################################
 write-log "###########################################  Partitions  ###########################################"
-$SectionLog= ($outputpath + '-Partitions_Report.txt')
+$SectionLog = ($outputpath + '-Partitions_Report.txt')
 write-log ('Dedicated Log output to: ' + $SectionLog)
 
 # List of all partitions in a forest
@@ -568,14 +567,14 @@ Write-Output ('Domain Functional Level is: ' + $dfl) >> $SectionLog
 #Domain Controllers
 write-log ('Domain Controllers:... ')
 Write-Output "Domain Controllers:..." >> $SectionLog
-$DClist | ForEach-Object {Write-Log $_}
-$DClist | ForEach-Object {$_} >> $SectionLog
+$DClist | ForEach-Object { Write-Log $_ }
+$DClist | ForEach-Object { $_ } >> $SectionLog
 #RO Domain Controllers 
-if (($RODCList| Measure-Object).Count -gt 0) {
+if (($RODCList | Measure-Object).Count -gt 0) {
     Write-Log ('RO Domain Controllers:... ')
     Write-Output ('RO Domain Controllers:...') >> $SectionLog
-    $RODCList | ForEach-Object {Write-Log $_}
-    $RODCList | ForEach-Object {$_} >> $SectionLog
+    $RODCList | ForEach-Object { Write-Log $_ }
+    $RODCList | ForEach-Object { $_ } >> $SectionLog
 }
 else {
     Write-Log "No Read Only Domain Controllers"
@@ -587,9 +586,9 @@ write-log "Current count of Domain Admins is: $domainAdminsNo"
 Write-Output "Current count of Domain Admins is: $domainAdminsNo" >> $SectionLog
 write-log "Domain Admins are:..."
 Write-Output "Domain Admins are:..." >> $SectionLog
-$domainAdminsNames | ForEach-Object {write-log $_.samaccountname}
-$domainAdminsNames | ForEach-Object {$_.samaccountname} >> $SectionLog
-$domainAdminsNames | ForEach-Object {Get-ADUser $_ | Select-Object *} | Export-Csv ($Outputlocation + '-AD-Domain-Admins.csv') -Append
+$domainAdminsNames | ForEach-Object { write-log $_.samaccountname }
+$domainAdminsNames | ForEach-Object { $_.samaccountname } >> $SectionLog
+$domainAdminsNames | ForEach-Object { Get-ADUser $_ | Select-Object * } | Export-Csv ($Outputlocation + '-AD-Domain-Admins.csv') -Append
 #Built-in Domain Administrator account details > last logon etc 
 Write-Log ('Builtin Admin Name: ' + $builtinAdmin.Name)
 Write-Output ('Builtin Admin Name: ' + $builtinAdmin.Name) >> $SectionLog
@@ -619,8 +618,8 @@ Write-Log ('Orphaned Objects Found: ' + $orphanedCount)
 Write-Output ('Orphaned Objects Found: ' + $orphanedCount) >> $SectionLog
 Write-Log ('Orphaned Objects Names:.. ') 
 Write-Output ('Orphaned Objects Names:.. ') >> $SectionLog
-$orphaned.Name | ForEach-Object {$_} >> $SectionLog
-$orphaned.Name | ForEach-Object {write-log $_}
+$orphaned.Name | ForEach-Object { $_ } >> $SectionLog
+$orphaned.Name | ForEach-Object { write-log $_ }
 #lingering or replication conflict objects 
 $lingConfReplCount = (Get-ADObject -LDAPFilter "(cn=*\0ACNF:*)" -SearchBase $domainDN -SearchScope SubTree | Measure-Object).Count
 $lingConfRepl = Get-ADObject -LDAPFilter "(cn=*\0ACNF:*)" -SearchBase $domainDN -SearchScope SubTree
@@ -628,8 +627,8 @@ Write-Log ('Lingering or replication conflict objects found: ' + $lingConfReplCo
 Write-Output ('Lingering or replication conflict objects found: ' + $lingConfReplCount) >> $SectionLog
 Write-Log ('Lingering or replication conflict objects:... ') #!# For each required and if there is any objects
 Write-Output ('Lingering or replication conflict objects:... ') >> $SectionLog
-$lingConfRepl.Name | ForEach-Object {$_} >> $SectionLog
-$lingConfRepl.Name | ForEach-Object {Write-Log $_} 
+$lingConfRepl.Name | ForEach-Object { $_ } >> $SectionLog
+$lingConfRepl.Name | ForEach-Object { Write-Log $_ } 
 #Active Directory Recycle Bin
 $ADRecBinSupport = "feature not supported"
 
@@ -1179,7 +1178,7 @@ else {
 }
 ###########################################  DNS  ###########################################
 write-log "###########################################  DNS  ###########################################"
-$SectionLog= ($outputpath + '-AD-Forrest_Report.txt')
+$SectionLog = ($outputpath + '-AD-Forrest_Report.txt')
 write-log ('Dedicated Log output to: ' + $SectionLog)
 #DNS Zone Information
 
@@ -1406,12 +1405,12 @@ write-log ('Users Inactive: ' + $usr_inactive_objectsNo)
 write-log ('Users Locked Out: ' + $usr_locked_objectsNo)
 write-log ('Users Password Not Required: ' + $usr_pwdnotreq_objectsNo)
 write-log ('Users Passwords That Never Expire: ' + $usr_pwdnotexp_objectsNo)
-write-output ('Users Object Count: ' + $usr_objectsNo) >> $SectionLog
-write-output ('Users Active: ' + $usr_active_objectsNo) >> $SectionLog
-write-output ('Users Inactive: ' + $usr_inactive_objectsNo) >> $SectionLog
-write-output ('Users Locked Out: ' + $usr_locked_objectsNo) >> $SectionLog
-write-output ('Users Password Not Required: ' + $usr_pwdnotreq_objectsNo) >> $SectionLog
-write-output ('Users Passwords That Never Expire: ' + $usr_pwdnotexp_objectsNo) >> $SectionLog
+Write-Output ('Users Object Count: ' + $usr_objectsNo) >> $SectionLog
+Write-Output ('Users Active: ' + $usr_active_objectsNo) >> $SectionLog
+Write-Output ('Users Inactive: ' + $usr_inactive_objectsNo) >> $SectionLog
+Write-Output ('Users Locked Out: ' + $usr_locked_objectsNo) >> $SectionLog
+Write-Output ('Users Password Not Required: ' + $usr_pwdnotreq_objectsNo) >> $SectionLog
+Write-Output ('Users Passwords That Never Expire: ' + $usr_pwdnotexp_objectsNo) >> $SectionLog
 #users not logged in for over 60 days
 write-log "Users which have not logged in, in over 60 Days..."
 Write-Output "" >> $SectionLog
@@ -1435,10 +1434,10 @@ write-log ('Group Object Count: ' + $grp_objectsNo)
 write-log ('Group Domain Local Count: ' + $grp_objects_localNo)
 write-log ('Group Universal Count: ' + $grp_objects_universalNo)
 write-log ('Group Global Count: ' + $grp_objects_globalNo)
-write-output ('Group Object Count: ' + $grp_objectsNo)  >> $SectionLog
-write-output ('Group Domain Local Count: ' + $grp_objects_localNo)  >> $SectionLog
-write-output ('Group Universal Count: ' + $grp_objects_universalNo)  >> $SectionLog
-write-output ('Group Global Count: ' + $grp_objects_globalNo)  >> $SectionLog
+Write-Output ('Group Object Count: ' + $grp_objectsNo)  >> $SectionLog
+Write-Output ('Group Domain Local Count: ' + $grp_objects_localNo)  >> $SectionLog
+Write-Output ('Group Universal Count: ' + $grp_objects_universalNo)  >> $SectionLog
+Write-Output ('Group Global Count: ' + $grp_objects_globalNo)  >> $SectionLog
 #Group lists 
 Write-Log "AD Group Names..."
 Write-Output "" >> $SectionLog
@@ -1470,7 +1469,6 @@ foreach ($group in $ADgroups.name) {
             $MemberGroupActiveOnly
         }
       
-
     }
     Write-Log ('Processing Group: ' + $group + ' - Complete')
     Write-Output "" >> $SectionLog
@@ -1478,7 +1476,6 @@ foreach ($group in $ADgroups.name) {
 
 #detailed list of all machines
 #detailed list of all users 
-
 
 ###########################################  END  ###########################################
 
