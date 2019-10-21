@@ -490,8 +490,16 @@ try {
     $allDomains | Sort-Object | ForEach-Object { $_ } >> $SectionLog
     $allDomains | ForEach-Object { Write-Log " Domains in this forrest $_" }
     #list default upn suffix
-    Write-Log "UPN Suffix: $UPNsuffix"
-    Write-Output "UPN Suffix: $UPNsuffix" >> $SectionLog
+    if (($UPNsuffix| Measure-Object).Count -eq 0)
+    {
+        Write-Log "UPN Suffix: NONE SET"
+        Write-Output "UPN Suffix: NONE SET" >> $SectionLog
+    }
+    else {
+        Write-Log "UPN Suffix: $UPNsuffix"
+        Write-Output "UPN Suffix: $UPNsuffix" >> $SectionLog
+    }
+
     #default naming master
     Write-Log "Domain Naming Master: $FSMODomainNaming"
     Write-Output "Domain Naming Master: $FSMODomainNaming" >> $SectionLog
@@ -506,7 +514,7 @@ try {
     $ADTrusts = Get-ADObject -Server $forest -Filter { objectClass -eq "trustedDomain" } -Properties CanonicalName, trustDirection
     Write-Output "AD Trusts:..." >> $SectionLog
     write-log "AD Trusts:..."
-    if ($ADTrusts.Count -gt 0) {
+    if (($ADTrusts|Measure-Object).Count -gt 0) {
         
         foreach ($Trust in $ADTrusts) {
 
@@ -659,7 +667,9 @@ write-log "Domain Admins are:..."
 Write-Output "Domain Admins are:..." >> $SectionLog
 $domainAdminsNames | ForEach-Object { write-log $_.samaccountname }
 $domainAdminsNames | ForEach-Object { $_.samaccountname } >> $SectionLog
-$domainAdminsNames | ForEach-Object { Get-ADUser $_ | Select-Object * } | Export-Csv ($outputpath + '-AD-Domain-Admins.csv') -Append
+$domainAdminsNames | ForEach-Object { Get-ADUser $_ | Select-Object Select-Object Name,department,sAMAccountName,givenName,surname,DisplayName,title,PasswordNeverExpires,PasswordLastSet,LastLogonDate,whenCreated,Description,Mail,ScriptPath,homeDirectory,homeDrive,Company,CN,distinguishedName,LockedOut,Enabled,LastBadPasswordAttempt,Country,Created,badPwdCount,CanonicalName,Manager,PasswordLastSet } | Export-Csv ($outputpath + '-AD-Domain-Admins.csv') -Append
+write-log ('File created at: ' + ($outputpath + '-AD-Domain-Admins.csv'))
+Write-Output ('Detailed log of Admin users created at: ' + ($outputpath + '-AD-Domain-Admins.csv')) >> $SectionLog
 #Built-in Domain Administrator account details > last logon etc 
 Write-Log ('Builtin Admin Name: ' + $builtinAdmin.Name)
 Write-Output ('Builtin Admin Name: ' + $builtinAdmin.Name) >> $SectionLog
@@ -728,8 +738,8 @@ write-log ('Tombstone Lifetime is (Days): ' + $tombstoneLifetime)
 Write-Output ('Tombstone Lifetime is (Days): ' + $tombstoneLifetime) >> $SectionLog
 #ou objects
 $ou_objectsNo = (Get-ADOrganizationalUnit -Server $domain -Filter * | Measure-Object).Count
-$ouobjectsDN = Get-ADOrganizationalUnit -Server $domain -Filter *
-$OUReportConfig = ($outputpath + '-OU_Config.txt')
+$ouobjectsDN = Get-ADOrganizationalUnit -Server $domain -Filter * | Select-Object Name,DistinguishedName,ObjectGUID
+$OUReportConfig = ($outputpath + '-OU_Config.csv')
 write-log ('OU Objects Totals: ' + $ou_objectsNo)
 Write-Output ('OU Objects Totals: ' + $ou_objectsNo) >> $SectionLog
 $ouobjectsDN | Export-Csv $OUReportConfig -Append
@@ -1248,7 +1258,7 @@ foreach ($dnszone in $dnszones) {
 }
 
 #DNS Stats
-$DNSstats = ($outputpath + 'DNS_Stats.txt')
+$DNSstats = ($outputpath + '-DNS_Stats.txt')
 Write-Log ('Exporting DNS Statistics to: ' + $DNSStats)
 Write-Output ('Exporting DNS Statistics to: ' + $DNSStats) >> $SectionLog
 Get-DnsServerZone | Select-Object zonename | Get-DnsServerStatistics >> $DNSstats
@@ -1290,7 +1300,7 @@ Write-Output ('File created at: ' + $DHCPv4OptionsReport) >> $SectionLog
 $DHCPv4ScopeReport = ($outputpath + 'DHCPv4ScopeReport.csv')
 write-log "Exporting DHCP Scope"
 Write-Output "Exporting DHCP Scope" >> $SectionLog
-$Report = @()
+$DHCPReport = @()
 $k = $null
 Write-Host -foregroundcolor Green "`n`n`n`n`n`n`n`n`n"
 foreach ($dhcpscope in $dhcpservers) {
@@ -1333,13 +1343,13 @@ foreach ($dhcpscope in $dhcpservers) {
                 }
                 $router = (Get-DhcpServerv4OptionValue -ComputerName $dhcpscope.DNSName -OptionId 3 -ScopeID $_.ScopeId).Value
                 $row.Router = $router[0]
-                $Report += $row }
+                $DHCPReport += $row }
         }
         Else {
             Write-Host -foregroundcolor Yellow """$($dhcpscope.DNSName)"" is either running Windows 2003, or is somehow not responding to querries. Adding to report as blank"
             $row = "" | Select-Object Hostname, ScopeID, SubnetMask, Name, State, StartRange, EndRange, LeaseDuration, Description, DNS1, DNS2, DNS3, GDNS1, GDNS2, GDNS3, Router
             $row.Hostname = $dhcpscope.DNSName
-            $Report += $row
+            $DHCPReport += $row
         }
     }
     Else {
@@ -1347,15 +1357,15 @@ foreach ($dhcpscope in $dhcpservers) {
         Write-Output "" >> $SectionLog
         $row = "" | Select-Object Hostname, ScopeID, SubnetMask, Name, State, StartRange, EndRange, LeaseDuration, Description, DNS1, DNS2, DNS3, GDNS1, GDNS2, GDNS3, Router
         $row.Hostname = $dhcpscope.DNSName
-        $Report += $row
+        $DHCPReport += $row
     }
     write-log ('Completed processing: ' + $dhcpscope.DNSName)
     Write-Output "" >> $SectionLog
 }
 
-$Report | Export-Csv -NoTypeInformation -UseCulture $DHCPv4ScopeReport
-write-log ('File Created at ' + $Report)
-Write-Output ('File Created at ' + $Report) >> $SectionLog
+$DHCPv4ScopeReport | Export-Csv -NoTypeInformation -UseCulture $DHCPv4ScopeReport
+write-log ('File Created at ' + $DHCPv4ScopeReport)
+Write-Output ('File Created at ' + $DHCPv4ScopeReport) >> $SectionLog
 
 ###########################################  users & Computers  ###########################################
 Write-Log "###########################################  Users & Computers  ###########################################"
@@ -1516,57 +1526,120 @@ foreach ($ADGroup in $ADGroups) {
     Write-Output ('Group Name: ' + $ADGroup.Name) >> $SectionLog
 }
 #members of groups
-Write-Log "Getting members of AD Groups"
-Write-Output "Getting members of AD Groups" >> $SectionLog
+Write-Log "Getting members of AD Groups:.."
+Write-Output "Getting members of AD Groups:..." >> $SectionLog
 $ADGroups = Get-ADGroup -Filter * | Select-Object Name
 $MemberGroupAll = ($outputpath + '-All_members_of_Group.csv')
 foreach ($group in $ADgroups.name) {
     Write-Log ('Processing Group: ' + $group + '...')
-    Write-Output ('Processing Group: ' + $group + '...') >> $SectionLog
+    #Write-Output ('Processing Group: ' + $group + '...') >> $SectionLog
    
     #gets list of users in ad group
     $membersofthegroup = Get-ADGroupMember -Identity $group | Select-Object samaccountname
 
     #goes through each member in the list to see if their enabled
-    foreach ($member in $membersofthegroup) {
-        $memberdetail = Get-ADUser $member.samaccountname -Properties * | Select-Object *
-        #looks up user in ad
-        $IsUserEnabled = Get-ADUser $member.samaccountname -Properties * | Select-Object Name, Enabled
-        #if based on there enabled 
-        if ($IsUserEnabled.enabled -eq $true) {
-            $OutputofifuserisActive = "Enabled"
+    #gets all AD Groups
+$getADGroups = Get-ADGroup -Filter * -SearchScope Subtree
+#for each group in the list 
+foreach ($getADGroup in $getADGroups)
+{
+    #get there members
+    $getADGroupMembers = get-adgroupmember -Identity $getADGroup
+    #checks hoiw many members are in the group if its equal to 0 then...
+    if (($getADGroupMembers | Measure-Object).count -eq 0)
+    {
 
-        }
-        else {
-            $OutputofifuserisActive = "Disabled"
-        }
-        $memberscsvoutput = @(
+    #output group has 0 users
+    Write-Log ('The Group: ' + $getADGroup.Name + ' Contains No Users') 
+    #state the pre defined param for csv output 
+    $memberscsvoutput = @(
             [pscustomobject]@{
-                GroupName   = $group
+                GroupName   = $getADGroup.Name
 
-                UsersName   = $memberdetail.DisplayName
+                UsersName   = ("No USERS")
 
-                SamAccount = $memberdetail.samaccountname
+                SamAccount = ("No USERS")
 
-                UserEmail   = $memberdetail.Mail
+                UserEmail   = ("No USERS")
         
-                UserActive  = $OutputofifuserisActive
-       
+                UserActive  = ("No USERS")
+
+                Type = ("N/A")
        
             })
-
+        #export to CSV
         $memberscsvoutput | Export-Csv $MemberGroupAll -Append -Force
-      
     }
-    Write-Log ('Processing Group: ' + $group + ' - Complete')
-    Write-Output ('Processing Group: ' + $group) >> $SectionLog
-}
+    #if the group has mopre than 0 members then...
+    else
+    {
+        #output group has users
+        #Write-Host ('The Group: ' + $getADGroup.Name + ' Contains Users')
+     
+        #for each member of the group do....
+        foreach ($getADGroupMember in $getADGroupMembers)
+            {
+            if ($getADGroupMember.objectClass -eq "group")
+            {
+            $memberscsvoutput = @(
+            [pscustomobject]@{
+                GroupName   = $getADGroup.Name
 
+                UsersName   = $getADGroupMember.Name
+
+                SamAccount = $getADGroupMember.SamAccountName
+
+                UserEmail   = ("n/a")
+        
+                UserActive  = ("n/a")
+
+                Type = ("GROUP")
+       
+            })
+        #export to CSV
+        $memberscsvoutput | Export-Csv $MemberGroupAll -Append -Force
+            }
+            else
+            {
+                #get their AD information
+                $getADGroupMemberDetail = Get-ADUser $getADGroupMember -Properties *
+                if ($getADGroupMemberDetail.enabled -eq $true) {
+           # write-host ('User ' + $getADGroupMemberDetail.samaccountname + ' is active')
+            $OutputofifuserisActive = "Enabled"
+            }
+        
+        else {
+            $OutputofifuserisActive = "Disabled"
+            #write-host ('User ' + $getADGroupMemberDetail.samaccountname + ' is NOT active') -ForegroundColor DarkYellow
+                        $memberscsvoutput = @(
+            [pscustomobject]@{
+                GroupName   = $getADGroup.Name
+
+                UsersName   = $getADGroupMember.Name
+
+                SamAccount = $getADGroupMember.SamAccountName
+
+                UserEmail   = $getADGroupMember.mail
+        
+                UserActive  = $OutputofifuserisActive
+
+                Type = ("User")
+       
+            })
+        #export to CSV
+        $memberscsvoutput | Export-Csv $MemberGroupAll -Append -Force
+        }
+        }
+            }
+    }
+}
+Write-Log ('File created at: ' + $MemberGroupAll)
+write-output ('File containing all members of groups located at: ' + $MemberGroupAll) >> $SectionLog
 #detailed list of all machines
 $DetailedlistofComp = ($outputpath + '-Detailed_List_of_Computers.csv')
 Write-Log "Getting list of AD Computers"
 Write-Output "Getting list of AD Computers" >> $SectionLog
-$listofadcomp = Get-ADComputer -Properties * | Select-Object Name,OperatingSystem,OperatingSystemHotfix,OperatingSystemServicePack,OperatingSystemVersion,Enabled,LockedOut,Location,whenCreated,IPv4Address,BadLogonCount,CN,CanonicalName,DistinguishedName,LastLogonDate,logonCount
+$listofadcomp = Get-ADComputer -Properties * -Filter * | Select-Object Name,OperatingSystem,OperatingSystemHotfix,OperatingSystemServicePack,OperatingSystemVersion,Enabled,LockedOut,Location,whenCreated,IPv4Address,BadLogonCount,CN,CanonicalName,DistinguishedName,LastLogonDate,logonCount
 $listofadcomp | Export-Csv $DetailedlistofComp -Append
 Write-Log ('File Created at ' + $DetailedlistofComp)
 Write-Output  ('File Created at ' + $DetailedlistofComp) >> $SectionLog
@@ -1575,7 +1648,7 @@ Write-Output  ('File Created at ' + $DetailedlistofComp) >> $SectionLog
 $Detailedlistofusers = ($outputpath + '-Detailed_List_of_Users.csv')
 Write-Log "Getting list of AD Users"
 Write-Output "Getting list of AD Users" >> $SectionLog
-$listofadusers = Get-ADUser -Filter * -Properties department,DisplayName,title,AccountExpires,pwdlastset,lastLogon,whenCreated,Description,Mail,ScriptPath,homeDirectory,homeDrive,Company,CN |Select-Object Name,department,sAMAccountName,givenName,surname,DisplayName,title,AccountExpires,pwdlastset,lastLogon,whenCreated,Description,Mail,ScriptPath,homeDirectory,homeDrive,Company,CN,distinguishedName
+$listofadusers = Get-ADUser -Filter * -Properties * | Select-Object Name,department,sAMAccountName,givenName,surname,DisplayName,title,PasswordNeverExpires,PasswordLastSet,LastLogonDate,whenCreated,Description,Mail,ScriptPath,homeDirectory,homeDrive,Company,CN,distinguishedName,LockedOut,Enabled,LastBadPasswordAttempt,Country,Created,badPwdCount,CanonicalName,Manager,PasswordLastSet
 $listofadusers | Export-Csv $Detailedlistofusers -Append
 Write-Log ('File Created at ' + $Detailedlistofusers)
 Write-Output  ('File Created at ' + $Detailedlistofusers) >> $SectionLog
