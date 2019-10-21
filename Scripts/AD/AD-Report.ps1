@@ -1,4 +1,3 @@
-
 #requires -version 5
 <#
 .REFERENCES
@@ -15,38 +14,108 @@ https://www.bvanleeuwen.nl/faq/?p=1182
 .INPUTS
   n/a
 .OUTPUTS
-  Log & CSV Files in C:\Temp\ADReport
+  Log of script running and majority of all outputs contained with in a single file
+ 
+  AD Forrest
+  ##Forest Name
+  ##Forest SID
+  ##Forest Distinguished SID
+  ##Forest Functional Version
+  ##Domaions in forest
+  ##Default naming master
+  ##global catalogue servers
+  ##llist of all trusts
+  ##additional upn suffixes
+  ##schema admins
+  ##enterprise admins
+  
+  Partitions
+  ##Partitions in a forrest
+  ##DNS servers that hold partitions
+  
+  AD Domain
+  ##DNS Distinguished names
+  #Domain SID's
+  ##DNS DOMAIN NAME
+  ##netbios
+  ##pdc emulator master
+  ##RID master
+  ##infra master
+  ##domain functional level
+  ##domain controllers
+  ##ro domain controllers
+  ##domain admins amount and who
+  ##builtin admin details
+
+  OU
+  ##default comp obj location
+  ##default user obj location
+  ##orphanned objects
+  ##replication conflicts
+  ##AD recycle bin on or off
+  ##tombstone liftetime
+  ##ou objects number
+
+  GPO
+  ##confirmation default domain policy exists
+  ##confirmation default domain controller policy exists
+  ##default domain password details
+  ##password complexity
+  ##reversable encryption enabled
+  ##last gpo modiified (x10)
+  ##GPO report
+  ##backs up the gpo's
+
+  Sites and subnets
+  ##lists all sites and subnets
+  ###DC's in sites / ip / os /sysvol / subnets
+
+  Exchange
+  ##Forrest Schema version
+
+  Skype
+  ##Forrest Skype Version
+
+  DNS
+  ##DNS Zone information
+  ##DNS Stats
+  ##DNS Static A records
+
+  DHCP
+  ##dhcp v4 options 
+  ##Scope ranges
+
+  Users and computers
+  ##Computer objects and type (count)
+  ###desktops / servers / unknown
+  ##Computers not logged in in over 60 days
+  ##User objects and type 
+  ##users not logged in in over 60 days
+  ##group objects and type
+  ##Group lists 
+  ##members of groups
+  ###active / inactive
+  ##detailed list of all machines
+  ##detailed list of all users
+
 .NOTES
   Version:        1.0
   Author:         PKnowles
   Creation Date:  2019-10-16
   Purpose/Change: Initial script development
 .ToDo
-#!Export to csvs or texts than just log files 
 #!ERROR: The term 'GB' is not recognized as the name of a cmdlet,
-#! Catch on all users/comp over 60 days
-#!state where everything is being exported
-#!fix skype schema not present layout
 #!on host screen split up users / computers to make it easirt to digest
 #!DHCP scope issue oddifty on stating couldnt connect when it can
-#!Resolve any highlted text in script 
-#!detailed list of all machines
-#!detailed list of all users 
 #!Bug on write-log error needs resolving in host window 
-#!Check for  groups builtinadmin/hyperv admins/rid admins
 #!Exchange domain schema level
 #!Exchange Organisation Name
+#!OU Objects Layout
 #!Azure is it connected to AD / 365 if so then connect and pull data 
 #!DNS Stale Records https://gallery.technet.microsoft.com/scriptcenter/Report-on-Stale-DNS-c6a0173b 
 .EXAMPLE
 Run script in host window
 #>
-
-#---------------------------------------------------------[Script Parameters]------------------------------------------------------
-
-Param (
-    #Script parameters go here
-)
 
 #---------------------------------------------------------[Initialisations]--------------------------------------------------------
 
@@ -351,8 +420,8 @@ Write-Host "This must be ran as an admin account" -ForegroundColor Red
 Start-Sleep -Seconds 10
 
 ###########################################  Checking if Import Excell is installed  ###########################################
-
-try {
+#Ignored for now
+<#try {
     if (Get-Module -ListAvailable -Name ImportExcel) {
         #$ReportType = 'Excel'
         Write-Log "ImportExcel module installed all exports will be to Excel "
@@ -370,7 +439,7 @@ catch {
     Write-log $ErrorMessage -level ERROR
     FailedItem = $_.Exception.ItemName
     Write-log $FailedItem -level ERROR
-}
+}#>
 
 ###########################################  AD Forrest  ###########################################
 write-log "###########################################  AD Forrest  ###########################################"
@@ -381,21 +450,21 @@ try {
     Write-Log "Forrest Name: $forest"
     Write-Output "Forrest Name: $forest" >> $SectionLog
     #Forrest SID
-    Write-Log "Forrest Domain SID: $forestDomainSID"
-    Write-Output "Forrest Domain SID: $forestDomainSID" >> $SectionLog
+    Write-Log ('Forrest Domain SID: ' + $forestDomainSID.domainSID)
+    Write-Output ('Forrest Domain SID: ' + $forestDomainSID.domainSID) >> $SectionLog
     #Forrest Distinguished Namne
     write-log "Forrest Distinguished Name: $forestDN"
     Write-Output "Forrest Distinguished Name: $forestDN" >> $SectionLog
     #Forrest Functional Version
     switch ($ffl) {
         #https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/active-directory-functional-levels
-        Windows2000Forest { write-log "Forest Functional Level is Windows 2000"; $FFVOut = "Forest Functional Level is Windows 2000" }
-        Windows2003Forest { write-log "Forest Functional Level is Windows Server 2003"; $FFVOut = "Forest Functional Level is Windows Server 2003" }
-        Windows2008Forest { write-log "Forest Functional Level is Windows Server 2008"; $FFVOut = "Forest Functional Level is Windows Server 2008" }
-        Windows2008R2Forest { write-log "Forest Functional Level is Windows Server 2008 R2"; $FFVOut = "Forest Functional Level is Windows Server 2008 R2" }
-        Windows2012Forest { write-log "Forest Functional Level is Windows Server 2012"; $FFVOut = "Forest Functional Level is Windows Server 2012" }
-        Windows2012R2Forest { write-log "Forest Functional Level is Windows Server 2012 R2"; $FFVOut = "Forest Functional Level is Windows Server 2012 R2" }
-        Windows2016Forest { write-log "Forest Functional Level is Windows Server 2016"; $FFVOut = "Forest Functional Level is Windows Server 2016" }
+        Windows2000Forest { write-log "Forest Functional Level is: Windows 2000"; $FFVOut = "Forest Functional Level is: Windows 2000" }
+        Windows2003Forest { write-log "Forest Functional Level is: Windows Server 2003"; $FFVOut = "Forest Functional Level is: Windows Server 2003" }
+        Windows2008Forest { write-log "Forest Functional Level is: Windows Server 2008"; $FFVOut = "Forest Functional Level is: Windows Server 2008" }
+        Windows2008R2Forest { write-log "Forest Functional Level is: Windows Server 2008 R2"; $FFVOut = "Forest Functional Level is: Windows Server 2008 R2" }
+        Windows2012Forest { write-log "Forest Functional Level is: Windows Server 2012"; $FFVOut = "Forest Functional Level is: Windows Server 2012" }
+        Windows2012R2Forest { write-log "Forest Functional Level is: Windows Server 2012 R2"; $FFVOut = "Forest Functional Level is: Windows Server 2012 R2" }
+        Windows2016Forest { write-log "Forest Functional Level is: Windows Server 2016"; $FFVOut = "Forest Functional Level is: Windows Server 2016" }
         default { write-log "Unknown Forest Functional Level: $ffl"; $FFVOut = "Unknown Forest Functional Level: $ffl" }
    
     }
@@ -403,37 +472,40 @@ try {
     #AD Schema Version
     switch ($SchemaVersion.objectVersion) {
     
-        13 { Write-Log ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows 2000 Server' ); $ADSVOut = ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows 2000 Server' ) }
-        30 { Write-Log ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2003'  ); $ADSVOut = ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2003'  ) }
-        31 { Write-Log ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2003 R2' ); $ADSVOut = ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2003 R2' ) }
-        44 { Write-Log ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2008' ); $ADSVOut = ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2008' ) }
-        47 { Write-Log ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2008 R2' ); $ADSVOut = ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2008 R2' ) }
-        56 { Write-Log ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2012' ); $ADSVOut = ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2012' ) }
-        69 { Write-Log ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2012 R2' ); $ADSVOut = ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2012 R2' ) }
-        87 { Write-Log ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2016' ); $ADSVOut = ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2016' ) }
-        88 { Write-Log ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2019' ); $ADSVOut = ('AD Schema is ' + $SchemaVersion.objectVersion + ' - Windows Server 2019' ) }
-        default { Write-Log ('unknown - AD Schema is ' + $SchemaVersion ); $ADSVOut = ('unknown - AD Schema is ' + $SchemaVersion ) }
+        13 { Write-Log ('AD Schema is: ' + $SchemaVersion.objectVersion + ' - Windows 2000 Server' ); $ADSVOut = ('AD Schema is: ' + $SchemaVersion.objectVersion + ' - Windows 2000 Server' ) }
+        30 { Write-Log ('AD Schema is: ' + $SchemaVersion.objectVersion + ' - Windows Server 2003'  ); $ADSVOut = ('AD Schema is: ' + $SchemaVersion.objectVersion + ' - Windows Server 2003'  ) }
+        31 { Write-Log ('AD Schema is: ' + $SchemaVersion.objectVersion + ' - Windows Server 2003 R2' ); $ADSVOut = ('AD Schema is: ' + $SchemaVersion.objectVersion + ' - Windows Server 2003 R2' ) }
+        44 { Write-Log ('AD Schema is: ' + $SchemaVersion.objectVersion + ' - Windows Server 2008' ); $ADSVOut = ('AD Schema is: ' + $SchemaVersion.objectVersion + ' - Windows Server 2008' ) }
+        47 { Write-Log ('AD Schema is: ' + $SchemaVersion.objectVersion + ' - Windows Server 2008 R2' ); $ADSVOut = ('AD Schema is: ' + $SchemaVersion.objectVersion + ' - Windows Server 2008 R2' ) }
+        56 { Write-Log ('AD Schema is: ' + $SchemaVersion.objectVersion + ' - Windows Server 2012' ); $ADSVOut = ('AD Schema is: ' + $SchemaVersion.objectVersion + ' - Windows Server 2012' ) }
+        69 { Write-Log ('AD Schema is: ' + $SchemaVersion.objectVersion + ' - Windows Server 2012 R2' ); $ADSVOut = ('AD Schema is: ' + $SchemaVersion.objectVersion + ' - Windows Server 2012 R2' ) }
+        87 { Write-Log ('AD Schema is: ' + $SchemaVersion.objectVersion + ' - Windows Server 2016' ); $ADSVOut = ('AD Schema is: ' + $SchemaVersion.objectVersion + ' - Windows Server 2016' ) }
+        88 { Write-Log ('AD Schema is: ' + $SchemaVersion.objectVersion + ' - Windows Server 2019' ); $ADSVOut = ('AD Schema is: ' + $SchemaVersion.objectVersion + ' - Windows Server 2019' ) }
+        default { Write-Log ('unknown - AD Schema is: ' + $SchemaVersion ); $ADSVOut = ('unknown - AD Schema is: ' + $SchemaVersion ) }
     }
     Write-Output $ADSVOut >> $SectionLog
     #list all domains in forrest 
+    write-log "Domains in Forrest:..."
+    Write-Output "Domains in Forrest:..." >> $SectionLog
     $allDomains | Sort-Object | ForEach-Object { $_ } >> $SectionLog
     $allDomains | ForEach-Object { Write-Log " Domains in this forrest $_" }
     #list default upn suffix
-    Write-Log "UPN Suffix $UPNsuffix"
-    Write-Output "UPN Suffix $UPNsuffix" >> $SectionLog
+    Write-Log "UPN Suffix: $UPNsuffix"
+    Write-Output "UPN Suffix: $UPNsuffix" >> $SectionLog
     #default naming master
-    Write-Log "Domain Naming Master $FSMODomainNaming"
-    Write-Output "Domain Naming Master $FSMODomainNaming" >> $SectionLog
+    Write-Log "Domain Naming Master: $FSMODomainNaming"
+    Write-Output "Domain Naming Master: $FSMODomainNaming" >> $SectionLog
     #schema master
-    Write-Log "Schema Master $FSMOSchema"
-    Write-Output "Schema Master $FSMOSchema" >> $SectionLog
+    Write-Log "Schema Master: $FSMOSchema"
+    Write-Output "Schema Master: $FSMOSchema" >> $SectionLog
     #GB or Global catalog servers
     Write-Log "All Global Catalogue Servers $ForestGC" 
-    Write-Output "All Global Catalogue Servers $ForestGC"  >> $SectionLog
+    Write-Output "All Global Catalogue Servers:... "  >> $SectionLog
+    $ForestGC | Sort-Object | ForEach-Object { $_ } >> $SectionLog
     #List of trusts
     $ADTrusts = Get-ADObject -Server $forest -Filter { objectClass -eq "trustedDomain" } -Properties CanonicalName, trustDirection
-    Write-Output "AD Trusts" >> $SectionLog
-    write-log "AD Trusts"
+    Write-Output "AD Trusts:..." >> $SectionLog
+    write-log "AD Trusts:..."
     if ($ADTrusts.Count -gt 0) {
         
         foreach ($Trust in $ADTrusts) {
@@ -539,7 +611,6 @@ foreach ($part in $partitions) {
 write-log "###########################################  AD Domain  ###########################################"
 $SectionLog = ($outputpath + '-AD-Domain_Report.txt')
 write-log ('Dedicated Log output to: ' + $SectionLog)
-Write-Output ('Dedicated Log output to: ' + $SectionLog) >> $SectionLog
 #DNS Distingushed name
 Write-Log ('Distinguished name is: ' + $domainDN)
 Write-Output ('Distinguished name is: ' + $domainDN) >> $SectionLog
@@ -556,10 +627,10 @@ Write-Output ('Netbios is: ' + $NetBIOS) >> $SectionLog
 write-log ('PDC Emulator Master is: ' + $FSMOPDC)
 Write-Output ('PDC Emulator Master is: ' + $FSMOPDC) >> $SectionLog
 #RID Master
-write-log ('Master is: ' + $FSMORID)
-Write-Output ('Master is: ' + $FSMORID) >> $SectionLog
+write-log ('RID Master is: ' + $FSMORID)
+Write-Output ('RID Master is: ' + $FSMORID) >> $SectionLog
 #Infrastructuree master
-write-log ('Master is: ' + $FSMOInfrastructure)
+write-log ('Infratsucture Master is: ' + $FSMOInfrastructure)
 Write-Output ('Master is: ' + $FSMOInfrastructure) >> $SectionLog
 #Domain Functional Level
 write-log ('Domain Functional Level is: ' + $dfl)
@@ -588,7 +659,7 @@ write-log "Domain Admins are:..."
 Write-Output "Domain Admins are:..." >> $SectionLog
 $domainAdminsNames | ForEach-Object { write-log $_.samaccountname }
 $domainAdminsNames | ForEach-Object { $_.samaccountname } >> $SectionLog
-$domainAdminsNames | ForEach-Object { Get-ADUser $_ | Select-Object * } | Export-Csv ($Outputlocation + '-AD-Domain-Admins.csv') -Append
+$domainAdminsNames | ForEach-Object { Get-ADUser $_ | Select-Object * } | Export-Csv ($outputpath + '-AD-Domain-Admins.csv') -Append
 #Built-in Domain Administrator account details > last logon etc 
 Write-Log ('Builtin Admin Name: ' + $builtinAdmin.Name)
 Write-Output ('Builtin Admin Name: ' + $builtinAdmin.Name) >> $SectionLog
@@ -603,7 +674,7 @@ Write-Output ('Builtin Admin Password Never Expires: ' + $builtinAdmin.PasswordN
 
 ###########################################  OU  ###########################################
 write-log "###########################################  OU  ###########################################"
-$SectionLog = ($outputpath + '-AD-Forrest_Report.txt')
+$SectionLog = ($outputpath + '-OU_Report.txt')
 write-log ('Dedicated Log output to: ' + $SectionLog)
 #Default domain computer objects location #!# no checks on redirect as it needs a better method
 write-log ('Defailt Computer OU: ' + $cmp_location)
@@ -625,7 +696,7 @@ $lingConfReplCount = (Get-ADObject -LDAPFilter "(cn=*\0ACNF:*)" -SearchBase $dom
 $lingConfRepl = Get-ADObject -LDAPFilter "(cn=*\0ACNF:*)" -SearchBase $domainDN -SearchScope SubTree
 Write-Log ('Lingering or replication conflict objects found: ' + $lingConfReplCount)
 Write-Output ('Lingering or replication conflict objects found: ' + $lingConfReplCount) >> $SectionLog
-Write-Log ('Lingering or replication conflict objects:... ') #!# For each required and if there is any objects
+Write-Log ('Lingering or replication conflict objects:... ') 
 Write-Output ('Lingering or replication conflict objects:... ') >> $SectionLog
 $lingConfRepl.Name | ForEach-Object { $_ } >> $SectionLog
 $lingConfRepl.Name | ForEach-Object { Write-Log $_ } 
@@ -657,9 +728,13 @@ write-log ('Tombstone Lifetime is (Days): ' + $tombstoneLifetime)
 Write-Output ('Tombstone Lifetime is (Days): ' + $tombstoneLifetime) >> $SectionLog
 #ou objects
 $ou_objectsNo = (Get-ADOrganizationalUnit -Server $domain -Filter * | Measure-Object).Count
+$ouobjectsDN = Get-ADOrganizationalUnit -Server $domain -Filter *
+$OUReportConfig = ($outputpath + '-OU_Config.txt')
 write-log ('OU Objects Totals: ' + $ou_objectsNo)
 Write-Output ('OU Objects Totals: ' + $ou_objectsNo) >> $SectionLog
-
+$ouobjectsDN | Export-Csv $OUReportConfig -Append
+write-log ('File created: ' + $OUReportConfig)
+Write-Output ('File created: '  + $OUReportConfig) >> $SectionLog
 ###########################################  GPO  ###########################################
 Write-Log "###########################################  GPO  ###########################################"
 $SectionLog = ($outputpath + '-GPO_Report.txt')
@@ -700,14 +775,14 @@ else {
 #Default Domain Password Policy details
 Write-log "Default Domain Password Policy details:"
 Write-Output "Default Domain Password Policy details:" >> $SectionLog
-Write-Log ('Minimum password age: ' + $pwdGPO.MinPasswordAge.days + 'day(s)')
-Write-Output ('Minimum password age: ' + $pwdGPO.MinPasswordAge.days + 'day(s)') >> $SectionLog
-Write-Log ('Maximum password age: ' + $pwdGPO.MaxPasswordAge.days + 'day(s)')
-Write-Output ('Maximum password age: ' + $pwdGPO.MaxPasswordAge.days + 'day(s)') >> $SectionLog
-Write-Log ('Minimum password length: ' + $pwdGpo.MinPasswordLength + 'character(s)')
-Write-Output ('Minimum password length: ' + $pwdGpo.MinPasswordLength + 'character(s)') >> $SectionLog
-Write-Log ('Password history count: ' + $pwdGPO.PasswordHistoryCount + 'unique password(s)')
-Write-Output ('Password history count: ' + $pwdGPO.PasswordHistoryCount + 'unique password(s)') >> $SectionLog
+Write-Log ('Minimum password age: ' + $pwdGPO.MinPasswordAge.days + ' day(s)')
+Write-Output ('Minimum password age: ' + $pwdGPO.MinPasswordAge.days + ' day(s)') >> $SectionLog
+Write-Log ('Maximum password age: ' + $pwdGPO.MaxPasswordAge.days + ' day(s)')
+Write-Output ('Maximum password age: ' + $pwdGPO.MaxPasswordAge.days + ' day(s)') >> $SectionLog
+Write-Log ('Minimum password length: ' + $pwdGpo.MinPasswordLength + ' character(s)')
+Write-Output ('Minimum password length: ' + $pwdGpo.MinPasswordLength + ' character(s)') >> $SectionLog
+Write-Log ('Password history count: ' + $pwdGPO.PasswordHistoryCount + ' unique password(s)')
+Write-Output ('Password history count: ' + $pwdGPO.PasswordHistoryCount + ' unique password(s)') >> $SectionLog
 #password complexity        
 if ( $pwdGPO.ComplexityEnabled ) {
             
@@ -739,7 +814,7 @@ else {
 
 #Last 10 GPO Modified
 write-log "Last 10 GPO's Modified"
-Write-Output "" >> $SectionLog
+Write-Output "Last 10 GPO's Modified" >> $SectionLog
 $GPOsModifiedlist = Get-GPO -all | Sort-Object ModificationTime -Descending | Select-Object -First 10 | Select-Object DisplayName, ModificationTime
 foreach ($gpomodifiedlist in $gposmodifiedlist) {
     write-log ('GPO Name: ' + $gpomodifiedlist.DisplayName + ' On the ' + $gpomodifiedlist.ModificationTime)
@@ -900,15 +975,15 @@ write-log ('Dedicated Log output to: ' + $SectionLog)
 $ConfigurationPart = ($ForestInfo.PartitionsContainer -Replace "CN=Partitions,", "")
 $AllSites = Get-ADObject -Server $forest -Filter { objectClass -eq "site" } -SearchBase $ConfigurationPart -Properties *
 Write-Log "Sites Enumeration:...."
-Write-Output "" >> $SectionLog
+Write-Output "Sites Enumeration:...." >> $SectionLog
 
 # Loop for Sites and Subnets
 foreach ( $Site in $AllSites ) {
      
     write-log ('Site: ' + $Site.Name)
-    Write-Output "" >> $SectionLog
+    Write-Output ('Site: ' + $Site.Name) >> $SectionLog
     write-log "Server(s) in site:"
-    Write-Output "" >> $SectionLog
+    Write-Output "Server(s) in site:" >> $SectionLog
     $ServersInSite = Get-ADObject -Server $forest -Filter { objectClass -eq "server" } -SearchBase $Site.distinguishedName -SearchScope Subtree -Properties Name | Select-Object Name | Sort-Object Name
     # Loop for Domain Controller details
     foreach ($SiteServer in $ServersInSite) {
@@ -919,12 +994,12 @@ foreach ( $Site in $AllSites ) {
             $dcDetails = Get-ADDomainController $SiteServer.Name -ErrorAction SilentlyContinue
             if (Test-Connection $server -Quiet) {
                 Write-Log ('Can sucsessfully connect to DC: ' + $dcDetail)
-                Write-Output "" >> $SectionLog
+                Write-Output ('Can sucsessfully connect to DC: ' + $dcDetail) >> $SectionLog
         
             } 
             else {
                 Write-Log ('Can NOT connect to DC: ' + $dcDetail) -Level Error
-                Write-Output "" >> $SectionLog
+                Write-Output ('Can NOT connect to DC: ' + $dcDetail) >> $SectionLog
             }
 
             $dcDN = $dcDetails.ComputerObjectDN -Replace $dcDetails.Name, ""
@@ -938,33 +1013,33 @@ foreach ( $Site in $AllSites ) {
 
             # Display Domain Controller details
             write-log ($SiteServer.Name + '(' + $dcDN + ')')
-            Write-Output "" >> $SectionLog
+            Write-Output ($SiteServer.Name + '(' + $dcDN + ')') >> $SectionLog
             write-log ('IP address (v4): ' + $dcDetails.ipv4address)
-            Write-Output "" >> $SectionLog
+            Write-Output ('IP address (v4): ' + $dcDetails.ipv4address) >> $SectionLog
 
             # IPv6 address
             if ($dcDetails.ipv6address -ne $nul) {
                              
                 write-log ('IP address (v6): ' + $dcDetails.ipv6address)
-                Write-Output "" >> $SectionLog
+                Write-Output ('IP address (v6): ' + $dcDetails.ipv6address) >> $SectionLog
                              
             }
                              
             else {
                              
                 write-log "IP address (v6):  (none)"
-                Write-Output "" >> $SectionLog
+                Write-Output "IP address (v6):  (none)" >> $SectionLog
                            
             }
                                 
             # Operating system type and its service pack level
             write-log ('OS type: ' + $dcDetails.operatingSystem)
-            Write-Output "" >> $SectionLog
+            Write-Output ('OS type: ' + $dcDetails.operatingSystem) >> $SectionLog
 
             if ($dcDetails.operatingSystemServicePack -ne $nul) {
                              
                 write-log ('Service Pack: ' + $dcDetails.operatingSystemServicePack)
-                Write-Output "" >> $SectionLog
+                Write-Output ('Service Pack: ' + $dcDetails.operatingSystemServicePack) >> $SectionLog
                              
             }
             # End of operating system and service pack level section
@@ -974,9 +1049,9 @@ foreach ( $Site in $AllSites ) {
             if ($dcFRSinfo -ne $nul) {
                              
                 write-log "SYSVOL replication :  FRS"
-                Write-Output "" >> $SectionLog
+                Write-Output "SYSVOL replication :  FRS" >> $SectionLog
                 write-log ('SYSVOL location: ' + $dcFRSinfo.fRSRootPath)
-                Write-Output "" >> $SectionLog
+                Write-Output ('SYSVOL location: ' + $dcFRSinfo.fRSRootPath) >> $SectionLog
                             
             }
             # End of SYSVOL FRS section
@@ -985,22 +1060,22 @@ foreach ( $Site in $AllSites ) {
             if ($dcDFSRinfo -ne $nul) {
                              
                 write-log  "SYSVOL replication:  DFS-R"
-                Write-Output "" >> $SectionLog
+                Write-Output "SYSVOL replication:  DFS-R" >> $SectionLog
                 write-log  ('SYSVOL location: ' + $dcDFSRinfo."msDFSR-RootPath")
-                Write-Output "" >> $SectionLog
+                Write-Output ('SYSVOL location: ' + $dcDFSRinfo."msDFSR-RootPath") >> $SectionLog
 
                 # SYSVOL size
                 if ($dcDFSRinfo."msDFSR-RootSizeInMb" -ne $nul) {
                                      
                     write-log ('SYSVOL quota: ' + $dcDFSRinfo."msDFSR-RootSizeInMb")
-                    Write-Output "" >> $SectionLog
+                    Write-Output ('SYSVOL quota: ' + $dcDFSRinfo."msDFSR-RootSizeInMb") >> $SectionLog
                                      
                 }
                                      
                 else {
                                      
                     write-log "SYSVOL quota:  4GB (default setting)"
-                    Write-Output "" >> $SectionLog
+                    Write-Output "SYSVOL quota:  4GB (default setting)" >> $SectionLog
                                      
                 }
                 # End of SYSVOL size
@@ -1015,7 +1090,7 @@ foreach ( $Site in $AllSites ) {
         else {
                  
             Write-Log "(none)"
-            Write-Output "" >> $SectionLog
+            Write-Output "(none)" >> $SectionLog
                  
         }
         # End of section where no DC in Site
@@ -1026,7 +1101,7 @@ foreach ( $Site in $AllSites ) {
     $subnets = $Site.siteObjectBL
 
     Write-log "Subnets:"
-    Write-Output "" >> $SectionLog
+    Write-Output "Subnets:" >> $SectionLog
 
     # If any Subnet assigned
     if ( $subnets -ne $nul ) {
@@ -1036,7 +1111,7 @@ foreach ( $Site in $AllSites ) {
                              
             $SubnetSplit = $Subnet.Split(",")
             Write-log ($SubnetSplit[0].Replace("CN=", ""))
-            Write-Output "" >> $SectionLog
+            Write-Output ($SubnetSplit[0].Replace("CN=", "")) >> $SectionLog
                              
         }
         # End of listing Subnets
@@ -1048,7 +1123,7 @@ foreach ( $Site in $AllSites ) {
     else {
                      
         Write-log "(none)"
-        Write-Output "" >> $SectionLog
+        Write-Output "(none)" >> $SectionLog
                      
     }
     # End of no Subnets section
@@ -1061,71 +1136,50 @@ foreach ( $Site in $AllSites ) {
 
 ###########################################  Exchange  ###########################################
 Write-Log "###########################################  Exchange  ###########################################"
-$SectionLog = ($outputpath + '-AD-Forrest_Report.txt')
+$SectionLog = ($outputpath + '-Exchange_Report.txt')
 write-log ('Dedicated Log output to: ' + $SectionLog)
 #Microsoft Exchange version
 $ExchangeSystemObjects = Get-ADObject -Server $forest -LDAPFilter "(&(objectClass=container)(name=Microsoft Exchange System Objects))" -SearchBase $forestDN -Properties objectVersion
 $ExchangeSchemaVersion = Get-ADObject -Server $forest -LDAPFilter "(&(objectClass=attributeSchema)(name=ms-Exch-Schema-Version-Pt))" -SearchBase $SchemaPartition -Properties rangeUpper
 
 $ExchangeSchema = $ExchangeSystemObjects.objectVersion + $ExchangeSchemaVersion.rangeUpper
-
+Write-Log "Finding Exchange Schema Version"
+Write-Output "Finding Exchange Schema Version" >> $SectionLog
 if ($ExchangeSchemaVersion -ne $nul) {
         
     switch ($ExchangeSchema) {
-        4397 { write-log "Exchange 2000 RTM" }
-        4397 { write-log "Exchange 2000 SP1" }
-        4406 { write-log "Exchange 2000 SP2" }
-        4406 { write-log "Exchange 2000 SP3" }
-        6870 { write-log "Exchange 2003 RTM" }
-        6870 { write-log "Exchange 2003 SP1" }
-        6870 { write-log "Exchange 2003 SP2" }
-        10637 { write-log "Exchange 2007 RTM" }
-        11116 { write-log "Exchange 2007 SP1" }
-        14622 { write-log "Exchange 2007 SP2" }
-        14625 { write-log "Exchange 2007 SP3" }
-        14622 { write-log "Exchange 2010 RTM" }
-        14726 { write-log "Exchange 2010 SP1" }
-        14732 { write-log "Exchange 2010 SP2" }
-        14734 { write-log "Exchange 2010 SP3" }
-        15137 { write-log "Exchange 2013 RTM" }
-        15254 { write-log "Exchange 2013 CU1" }
-        15281 { write-log "Exchange 2013 CU2" }
-        15283 { write-log "Exchange 2013 CU3" }
-        15292 { write-log "Exchange 2013 SP1 (CU4)" }
-        15300 { write-log "Exchange 2013 CU5" }
-        15303 { write-log "Exchange 2013 CU6" }
-        15312 { write-log "Exchange 2013 CU7" }
-        15312 { write-log "Exchange 2013 CU8" }
-        15312 { write-log "Exchange 2013 CU9" }
-        15312 { write-log "Exchange 2013 CU10" }
-        15312 { write-log "Exchange 2013 CU11" }
-        15312 { write-log "Exchange 2013 CU12" }
-        15312 { write-log "Exchange 2013 CU13" }
-        15312 { write-log "Exchange 2013 CU14" }
-        15312 { write-log "Exchange 2013 CU15" }
-        15312 { write-log "Exchange 2013 CU16" }
-        15312 { write-log "Exchange 2013 CU17" }
-        15312 { write-log "Exchange 2013 CU18" }
-        15312 { write-log "Exchange 2013 CU19" }
-        15312 { write-log "Exchange 2013 CU20" }
-        15312 { write-log "Exchange 2013 CU21" }
-        15317 { write-log "Exchange 2016 RTM" }
-        15323 { write-log "Exchange 2016 CU1" }
-        15325 { write-log "Exchange 2016 CU2" }
-        15326 { write-log "Exchange 2016 CU3" }
-        15326 { write-log "Exchange 2016 CU4" }
-        15326 { write-log "Exchange 2016 CU5" }
-        15330 { write-log "Exchange 2016 CU6" }
-        15332 { write-log "Exchange 2016 CU7" }
-        15332 { write-log "Exchange 2016 CU8" }
-        15332 { write-log "Exchange 2016 CU9" }
-        15332 { write-log "Exchange 2016 CU10" }
-        15332 { write-log "Exchange 2016 CU11" }
-        17000 { write-log "Exchange 2019 RTM" }
-        default { write-log ('unknown - ' + $ExchangeSchemaVersion.rangeUpper) }
+        4397 { write-log "Exchange 2000 RTM"; $ESV = "Exchange 2000 RTM" }
+        4397 { write-log "Exchange 2000 SP1"; $ESV = "Exchange 2000 SP1" }
+        4406 { write-log "Exchange 2000 SP2/SP3"; $ESV = "Exchange 2000 SP2/SP3" }
+        6870 { write-log "Exchange 2003 RTM / SP1 / SP2"; $ESV = "Exchange 2003 RTM / SP1 / SP2" }
+        10637 { write-log "Exchange 2007 RTM"; $ESV = "Exchange 2007 RTM" }
+        11116 { write-log "Exchange 2007 SP1"; $ESV = "Exchange 2007 SP1" }
+        14622 { write-log "Exchange 2007 SP2"; $ESV = "Exchange 2007 SP2" }
+        14625 { write-log "Exchange 2007 SP3"; $ESV = "Exchange 2007 SP3" }
+        14622 { write-log "Exchange 2010 RTM"; $ESV = "Exchange 2010 RTM" }
+        14726 { write-log "Exchange 2010 SP1"; $ESV = "Exchange 2010 SP1" }
+        14732 { write-log "Exchange 2010 SP2"; $ESV = "Exchange 2010 SP2" }
+        14734 { write-log "Exchange 2010 SP3"; $ESV = "Exchange 2010 SP3" }
+        15137 { write-log "Exchange 2013 RTM"; $ESV = "Exchange 2013 RTM" }
+        15254 { write-log "Exchange 2013 CU1"; $ESV = "Exchange 2013 CU1" }
+        15281 { write-log "Exchange 2013 CU2"; $ESV = "Exchange 2013 CU2" }
+        15283 { write-log "Exchange 2013 CU3"; $ESV = "Exchange 2013 CU3" }
+        15292 { write-log "Exchange 2013 SP1 (CU4)"; $ESV = "Exchange 2013 SP1 (CU4)" }
+        15300 { write-log "Exchange 2013 CU5"; $ESV = "Exchange 2013 CU5" }
+        15303 { write-log "Exchange 2013 CU6"; $ESV = "Exchange 2013 CU6" }
+        15312 { write-log "Exchange 2013 CU7 - 21"; $ESV = "Exchange 2013 CU7 - 21" }
+        15317 { write-log "Exchange 2016 RTM"; $ESV = "Exchange 2016 RTM" }
+        15323 { write-log "Exchange 2016 CU1"; $ESV = "Exchange 2016 CU1" }
+        15325 { write-log "Exchange 2016 CU2"; $ESV = "Exchange 2016 CU2" }
+        15326 { write-log "Exchange 2016 CU3 - 5"; $ESV = "Exchange 2016 CU3 - 5" }
+        15330 { write-log "Exchange 2016 CU6"; $ESV = "Exchange 2016 CU6" }
+        15332 { write-log "Exchange 2016 CU7 - 11"; $ESV = "Exchange 2016 CU7 - 11" }
+        17000 { write-log "Exchange 2019 RTM"; $ESV = "Exchange 2019 RTM" }
+        
+        default { write-log ('unknown - ' + $ExchangeSchemaVersion.rangeUpper); $ESV = ('unknown - ' + $ExchangeSchemaVersion.rangeUpper) }
                     
     }
-    Write-Output "" >> $SectionLog
+    Write-Output ('Exchange Schema version is:' + $ESV) >> $SectionLog
     <#
             #Ignored due to unable to test
             $ExchOrganization = (Get-ADObject -Server $forest -Identity "cn=Microsoft Exchange,cn=Services,$configPartition" -Properties templateRoots).templateRoots
@@ -1142,50 +1196,51 @@ if ($ExchangeSchemaVersion -ne $nul) {
 else {
         
     Write-Log "Exchange Schema not present"
-    Write-Output "" >> $SectionLog
+    Write-Output "Exchange Schema not present" >> $SectionLog
         
 }
 
 ###########################################  Skype  ###########################################
 write-log "###########################################  Skype  ###########################################"
-$SectionLog = ($outputpath + '-AD-Forrest_Report.txt')
+$SectionLog = ($outputpath + '-Skype_Report.txt')
 write-log ('Dedicated Log output to: ' + $SectionLog)
 #Microsoft Lync/Skype Schema version
 write-log "Skype Schema Version:...."
-Write-Output "" >> $SectionLog
+Write-Output "Skype Schema Version:...." >> $SectionLog
 $LyncSchemaVersion = Get-ADObject -Server $forest -LDAPFilter "(&(objectClass=attributeSchema)(name=ms-RTC-SIP-SchemaVersion))" -SearchBase $SchemaPartition -Properties rangeUpper
 
 if ($LyncSchemaVersion -ne $nul) {
     
     switch ($LyncSchemaVersion.rangeUpper) {
             
-        1006 { Write-Log "Live Communications Server 2005" }
-        1007 { Write-Log "Office Communications Server 2007 Release 1" }
-        1008 { Write-Log "Office Communications Server 2007 Release 2" }
-        1100 { Write-Log "Lync Server 2010" }
-        1150 { Write-Log "Lync Server 2013 / Skype 2015+" }
-        default { write-log ('unknown - ' + $LyncSchemaVersion.rangeUpper ) }
+        1006 { Write-Log "Live Communications Server 2005" ; $SSV = "Live Communications Server 2005" }
+        1007 { Write-Log "Office Communications Server 2007 Release 1" ; $SSV = "Office Communications Server 2007 Release 1" }
+        1008 { Write-Log "Office Communications Server 2007 Release 2" ; $SSV = "Office Communications Server 2007 Release 2" }
+        1100 { Write-Log "Lync Server 2010" ; $SSV = "Lync Server 2010" }
+        1150 { Write-Log "Lync Server 2013 / Skype 2015+" ; $SSV = "Lync Server 2013 / Skype 2015+" }
+        default { write-log ('unknown - ' + $LyncSchemaVersion.rangeUpper ) ; $SSV = ('unknown - ' + $LyncSchemaVersion.rangeUpper ) }
             
     }
-    Write-Output "" >> $SectionLog
+    Write-Output $SSV >> $SectionLog
 }# end if
     
 else {
     
     Write-Log "(not present)"
-    Write-Output "" >> $SectionLog
+    Write-Output "(not present)" >> $SectionLog
     
 }
 ###########################################  DNS  ###########################################
 write-log "###########################################  DNS  ###########################################"
-$SectionLog = ($outputpath + '-AD-Forrest_Report.txt')
+$SectionLog = ($outputpath + '-DNS_Report.txt')
 write-log ('Dedicated Log output to: ' + $SectionLog)
 #DNS Zone Information
 
 Write-log ('Exporting reports on DNS')
-Write-Output "" >> $SectionLog
+Write-Output ('Exporting reports on DNS') >> $SectionLog
 foreach ($dnszone in $dnszones) {
     Write-Log ('Exporting information on zone: ' + $dnszone.zonename)
+    Write-Output ('Exporting information on zone: ' + $dnszone.zonename) >> $SectionLog
     Export-DNSServerZoneReport -Domain $dnszone.zonename >> $logpath
     Export-DNSServerIPConfiguration -Domain $dnszone.zonename >> $logpath
     Export-DNSServerZoneReport -Domain $dnszone.zonename >> $SectionLog
@@ -1195,11 +1250,12 @@ foreach ($dnszone in $dnszones) {
 #DNS Stats
 $DNSstats = ($outputpath + 'DNS_Stats.txt')
 Write-Log ('Exporting DNS Statistics to: ' + $DNSStats)
+Write-Output ('Exporting DNS Statistics to: ' + $DNSStats) >> $SectionLog
 Get-DnsServerZone | Select-Object zonename | Get-DnsServerStatistics >> $DNSstats
 
 #DNS Static A Records
 Write-Log "Exporting Static A records"
-Write-Output "" >> $SectionLog
+Write-Output "Exporting Static A records" >> $SectionLog
 
 foreach ($StaticARecord in $dnszones) {
     $DNS_A_SRecord = ($outputpath + '-DNS-Stating-A-Recordlocation.csv')
@@ -1207,33 +1263,33 @@ foreach ($StaticARecord in $dnszones) {
 
 }
 Write-Log ('File Created at: ' + $DNS_A_SRecord )
-Write-Output "" >> $SectionLog
+Write-Output ('File Created at: ' + $DNS_A_SRecord ) >> $SectionLog
 
 ###########################################  DHCP  ###########################################
 Write-Log "###########################################  DHCP  ###########################################"
-$SectionLog = ($outputpath + '-AD-Forrest_Report.txt')
+$SectionLog = ($outputpath + '-DHCP_Report.txt')
 write-log ('Dedicated Log output to: ' + $SectionLog)
 write-log "Listing DHCP Servers in AD..."
-Write-Output "" >> $SectionLog
+Write-Output "Listing DHCP Servers in AD..." >> $SectionLog
 foreach ($dhcpserver in $dhcpservers ) {
     $testDHCPServerActive = Test-Connection -ComputerName $dhcpserver -Quiet
     write-log ('DHCP Server Name: ' + $dhcpserver.DNSName + ' on the IP: ' + $dhcpserver.IPAddress + ' Is Active: ' + $testDHCPServerActive)
-    Write-Output "" >> $SectionLog
+    Write-Output ('DHCP Server Name: ' + $dhcpserver.DNSName + ' on the IP: ' + $dhcpserver.IPAddress + ' Is Active: ' + $testDHCPServerActive) >> $SectionLog
 }
 #DHCP V4 Options
 Write-Log "Exporting DHCP v4 Options"
-Write-Output "" >> $SectionLog
+Write-Output "Exporting DHCP v4 Options" >> $SectionLog
 $DHCPv4OptionsReport = ($outputpath + 'DHCPv4OptionsOutput.csv')
 Get-DhcpServerv4Scope -ComputerName $dhcpserverSelected | Get-DhcpServerv4OptionValue >> $logpath
 Get-DhcpServerv4Scope -ComputerName $dhcpserverSelected | Get-DhcpServerv4OptionValue >> $SectionLog
 Get-DhcpServerv4Scope -ComputerName $dhcpserverSelected | Get-DhcpServerv4OptionValue | Export-Csv $DHCPv4OptionsReport -Append
 Write-Log ('File created at: ' + $DHCPv4OptionsReport)
-Write-Output "" >> $SectionLog
+Write-Output ('File created at: ' + $DHCPv4OptionsReport) >> $SectionLog
 
 #Scope Ranges
 $DHCPv4ScopeReport = ($outputpath + 'DHCPv4ScopeReport.csv')
 write-log "Exporting DHCP Scope"
-Write-Output "" >> $SectionLog
+Write-Output "Exporting DHCP Scope" >> $SectionLog
 $Report = @()
 $k = $null
 Write-Host -foregroundcolor Green "`n`n`n`n`n`n`n`n`n"
@@ -1298,16 +1354,17 @@ foreach ($dhcpscope in $dhcpservers) {
 }
 
 $Report | Export-Csv -NoTypeInformation -UseCulture $DHCPv4ScopeReport
-write-log ('')
-Write-Output "" >> $SectionLog
+write-log ('File Created at ' + $Report)
+Write-Output ('File Created at ' + $Report) >> $SectionLog
 
 ###########################################  users & Computers  ###########################################
 Write-Log "###########################################  Users & Computers  ###########################################"
-$SectionLog = ($outputpath + '-AD-Forrest_Report.txt')
+$SectionLog = ($outputpath + '-Users_and_Computers_Report.txt')
 write-log ('Dedicated Log output to: ' + $SectionLog)
 
 #computer objects and type
 Write-Log "Computer Objects in Domain"
+Write-Output "Computer Objects in Domain" >> $SectionLog
 $cmp_os_2000 = 0
 $cmp_os_xp = 0
 $cmp_os_7 = 0
@@ -1375,16 +1432,22 @@ Write-Output ('Windows Server 2012: ' + $cmp_srvos_2012) >> $SectionLog
 Write-Output ('Windows Server 2012R2: ' + $cmp_srvos_2012r2) >> $SectionLog
 Write-Output ('Windows Server 2016: ' + $cmp_srvos_2016) >> $SectionLog
 Write-Output ('Windows Server 2019: ' + $cmp_srvos_2019) >> $SectionLog
-Write-Output ('OS(s) >> $SectionLog Not Filtered for: ' + $cmp_os_unkwn) >> $SectionLog
+Write-Output ('OS(s) Not Filtered for: ' + $cmp_os_unkwn) >> $SectionLog
 #Computers not logged in, in over 60 days
 write-log "Machines which have not logged in, in over 60 Days..."
-Write-Output "" >> $SectionLog
+Write-Output "Machines which have not logged in, in over 60 Days...(see Log)" >> $SectionLog
 $compsnotloggedin = Get-ADComputer  -Properties * -Filter * | Where-Object { $_.lastlogondate -lt (Get-Date).AddDays(-60) } | Select-Object Name, lastlogondate, CanonicalName, OperatingSystem, Enabled 
 foreach ($compnotloggedin in $compsnotloggedin) {
     Write-Log ('The follwoing Machine ' + $compnotloggedin.Name + ' Has not logged in since ' + $compnotloggedin.lastlogondate + ' Its OS is ' + $compnotloggedin.OperatingSystem + ' Its status is ' + $compnotloggedin.Enabled)
-    Write-Output "" >> $SectionLog
+    
 }
+$compsnotloggedinLOG = ($outputpath + '-Comp60days.csv')
+$compsnotloggedin | Export-Csv $compsnotloggedinLOG -Append
+Write-Log ('New File Created: ' + $compsnotloggedinLOG)
+Write-Output ('New File Created: ' + $compsnotloggedinLOG) >> $SectionLog
 #user objects and type
+Write-Log "User Objects in Domain"
+Write-Output "User Objects in Domain" >> $SectionLog
 $usr_objectsNo = 0
 $usr_active_objectsNo = 0
 $usr_inactive_objectsNo = 0
@@ -1413,13 +1476,19 @@ Write-Output ('Users Password Not Required: ' + $usr_pwdnotreq_objectsNo) >> $Se
 Write-Output ('Users Passwords That Never Expire: ' + $usr_pwdnotexp_objectsNo) >> $SectionLog
 #users not logged in for over 60 days
 write-log "Users which have not logged in, in over 60 Days..."
-Write-Output "" >> $SectionLog
+Write-Output "Users which have not logged in, in over 60 Days...(see log)" >> $SectionLog
 $usersnotloggedin = Get-ADUser  -Properties * -Filter * | Where-Object { $_.lastlogondate -lt (Get-Date).AddDays(-60) } | Select-Object Name, LastLogonDate, Enabled, samaccountname  
 foreach ($usernotloggedin in $usersnotloggedin) {
     Write-Log ('The user ' + $usernotloggedin.Name + ' with username ' + $usernotloggedin.samaccountname + ' has not logged in since ' + $usernotloggedin.LastLogonDate + ' their status is ' + $usernotloggedin.Enabled)
-    Write-Output "" >> $SectionLog
+    
 }
+$usersnotloggedinLOG = ($outputpath + '-User60days.csv')
+$usersnotloggedin | Export-Csv $usersnotloggedinLOG -Append
+Write-Log ('New File Created: ' + $usersnotloggedinLOG)
+Write-Output ('New File Created: ' + $usersnotloggedinLOG) >> $SectionLog
 #group objects and type
+Write-Log "Group Objects in Domain"
+Write-Output "Group Objects in Domain" >> $SectionLog
 $grp_objectsNo = 0
 $grp_objects_localNo = 0
 $grp_objects_universalNo = 0
@@ -1440,42 +1509,76 @@ Write-Output ('Group Universal Count: ' + $grp_objects_universalNo)  >> $Section
 Write-Output ('Group Global Count: ' + $grp_objects_globalNo)  >> $SectionLog
 #Group lists 
 Write-Log "AD Group Names..."
-Write-Output "" >> $SectionLog
+Write-Output "AD Group Names..." >> $SectionLog
 $ADGroups = Get-ADGroup -Filter * | Select-Object Name
 foreach ($ADGroup in $ADGroups) {
     write-log ('Group Name: ' + $ADGroup.Name)
-    Write-Output "" >> $SectionLog
+    Write-Output ('Group Name: ' + $ADGroup.Name) >> $SectionLog
 }
 #members of groups
 Write-Log "Getting members of AD Groups"
-Write-Output "" >> $SectionLog
+Write-Output "Getting members of AD Groups" >> $SectionLog
 $ADGroups = Get-ADGroup -Filter * | Select-Object Name
-$MemberGroupAll = ($outputpath + '-All_members_of_Groups.csv')
-$MemberGroupActiveOnly = ($outputpath + '-Active_only_members_of_Groups.csv')
+$MemberGroupAll = ($outputpath + '-All_members_of_Group.csv')
 foreach ($group in $ADgroups.name) {
     Write-Log ('Processing Group: ' + $group + '...')
-    Write-Output "" >> $SectionLog
+    Write-Output ('Processing Group: ' + $group + '...') >> $SectionLog
+   
     #gets list of users in ad group
-    $membersofthegroup = Get-ADGroupMember -Identity $group | Select-Object samaccountname, name
+    $membersofthegroup = Get-ADGroupMember -Identity $group | Select-Object samaccountname
 
     #goes through each member in the list to see if their enabled
     foreach ($member in $membersofthegroup) {
-        $MemberGroupAll
+        $memberdetail = Get-ADUser $member.samaccountname -Properties * | Select-Object *
         #looks up user in ad
         $IsUserEnabled = Get-ADUser $member.samaccountname -Properties * | Select-Object Name, Enabled
         #if based on there enabled 
         if ($IsUserEnabled.enabled -eq $true) {
-            #Output to filtered members for ernabled only 
-            $MemberGroupActiveOnly
+            $OutputofifuserisActive = "Enabled"
+
         }
+        else {
+            $OutputofifuserisActive = "Disabled"
+        }
+        $memberscsvoutput = @(
+            [pscustomobject]@{
+                GroupName   = $group
+
+                UsersName   = $memberdetail.DisplayName
+
+                SamAccount = $memberdetail.samaccountname
+
+                UserEmail   = $memberdetail.Mail
+        
+                UserActive  = $OutputofifuserisActive
+       
+       
+            })
+
+        $memberscsvoutput | Export-Csv $MemberGroupAll -Append -Force
       
     }
     Write-Log ('Processing Group: ' + $group + ' - Complete')
-    Write-Output "" >> $SectionLog
+    Write-Output ('Processing Group: ' + $group) >> $SectionLog
 }
 
 #detailed list of all machines
+$DetailedlistofComp = ($outputpath + '-Detailed_List_of_Computers.csv')
+Write-Log "Getting list of AD Computers"
+Write-Output "Getting list of AD Computers" >> $SectionLog
+$listofadcomp = Get-ADComputer -Properties * | Select-Object Name,OperatingSystem,OperatingSystemHotfix,OperatingSystemServicePack,OperatingSystemVersion,Enabled,LockedOut,Location,whenCreated,IPv4Address,BadLogonCount,CN,CanonicalName,DistinguishedName,LastLogonDate,logonCount
+$listofadcomp | Export-Csv $DetailedlistofComp -Append
+Write-Log ('File Created at ' + $DetailedlistofComp)
+Write-Output  ('File Created at ' + $DetailedlistofComp) >> $SectionLog
+
 #detailed list of all users 
+$Detailedlistofusers = ($outputpath + '-Detailed_List_of_Users.csv')
+Write-Log "Getting list of AD Users"
+Write-Output "Getting list of AD Users" >> $SectionLog
+$listofadusers = Get-ADUser -Filter * -Properties department,DisplayName,title,AccountExpires,pwdlastset,lastLogon,whenCreated,Description,Mail,ScriptPath,homeDirectory,homeDrive,Company,CN |Select-Object Name,department,sAMAccountName,givenName,surname,DisplayName,title,AccountExpires,pwdlastset,lastLogon,whenCreated,Description,Mail,ScriptPath,homeDirectory,homeDrive,Company,CN,distinguishedName
+$listofadusers | Export-Csv $Detailedlistofusers -Append
+Write-Log ('File Created at ' + $Detailedlistofusers)
+Write-Output  ('File Created at ' + $Detailedlistofusers) >> $SectionLog
 
 ###########################################  END  ###########################################
 
