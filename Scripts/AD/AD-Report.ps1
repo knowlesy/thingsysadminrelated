@@ -556,8 +556,8 @@ try {
     $schemaAdminsNo = Get-ADGroup -Server $forest -Identity $schemaGroupID | Get-ADGroupMember -Recursive
     Write-log ('Total number of Schema Administrators: ' + ($schemaAdminsNo | Measure-Object).Count)
     Write-Output ('Total number of Schema Administrators: ' + ($schemaAdminsNo | Measure-Object).Count) >> $SectionLog
-    Write-Log ('Schema Admins are as follows : ' + ($schemaAdminsNo | Select-Object *))
-    Write-Output ('Schema Admins are as follows : ' + ($schemaAdminsNo | Select-Object *)) >> $SectionLog
+    Write-Log ('Schema Admins are as follows : ' + ($schemaAdminsNo.samaccountname))
+    Write-Output ('Schema Admins are as follows : ' + ($schemaAdminsNo.samaccountname)) >> $SectionLog
        
     # Enterprise Admins #! missed off eq 1 is it needed# 
     $entGroupID = ((Get-ADDomain(Get-ADForest).name).domainSID).value + "-519"
@@ -666,7 +666,7 @@ write-log "Domain Admins are:..."
 Write-Output "Domain Admins are:..." >> $SectionLog
 $domainAdminsNames | ForEach-Object { write-log $_.samaccountname }
 $domainAdminsNames | ForEach-Object { $_.samaccountname } >> $SectionLog
-$domainAdminsNames | ForEach-Object { Get-ADUser $_ | Select-Object Select-Object Name, department, sAMAccountName, givenName, surname, DisplayName, title, PasswordNeverExpires, PasswordLastSet, LastLogonDate, whenCreated, Description, Mail, ScriptPath, homeDirectory, homeDrive, Company, CN, distinguishedName, LockedOut, Enabled, LastBadPasswordAttempt, Country, Created, badPwdCount, CanonicalName, Manager, PasswordLastSet } | Export-Csv ($outputpath + '-AD-Domain-Admins.csv') -Append
+$domainAdminsNames | ForEach-Object { Get-ADUser $_ | Select-Object Name, department, sAMAccountName, givenName, surname, DisplayName, title, PasswordNeverExpires, PasswordLastSet, LastLogonDate, whenCreated, Description, Mail, ScriptPath, homeDirectory, homeDrive, Company, CN, distinguishedName, LockedOut, Enabled, LastBadPasswordAttempt, Country, Created, badPwdCount, CanonicalName, Manager, PasswordLastSet } | Export-Csv ($outputpath + '-AD-Domain-Admins.csv') -Append
 write-log ('File created at: ' + ($outputpath + '-AD-Domain-Admins.csv'))
 Write-Output ('Detailed log of Admin users created at: ' + ($outputpath + '-AD-Domain-Admins.csv')) >> $SectionLog
 #Built-in Domain Administrator account details > last logon etc 
@@ -1201,7 +1201,6 @@ if ($ExchangeSchemaVersion -ne $nul) {
             #>
 
 } #end if
-        
 else {
         
     Write-Log "Exchange Schema not present"
