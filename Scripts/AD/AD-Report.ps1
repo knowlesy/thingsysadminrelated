@@ -134,7 +134,8 @@ try {
     Import-Module ActiveDirectory
     Import-Module GroupPolicy
     Import-Module DHCPServer
-    Write-Host "Setting Global variables, this will take some time please be patient" -ForegroundColor Green
+    Add-Type -assembly 'system.io.compression.filesystem'
+    Write-Host "Setting Global variables, this will take some time please be patient" -ForegroundColor Magenta      
 }
 catch {
     # Exception is stored in the automatic variable $_
@@ -154,6 +155,7 @@ $ErrorActionPreference = 'SilentlyContinue'
 #Static Variables for  Logging Function
 $date = Get-Date -Format yyyy-MM-dd-HH-mm
 $logcreated = Get-Date
+$rootdir = 'C:\Temp\'
 $Log_Location = 'C:\Temp\ADReport\'
 $Outputlocation = ($Log_Location)
 $outputpath = ($Outputlocation + $date)
@@ -407,7 +409,7 @@ else {
 }
 
 #Information for End user
-Write-Host "This must be ran as an admin account" -ForegroundColor Red
+Write-Host "This must be ran as an admin account" -ForegroundColor Magenta      
 Start-Sleep -Seconds 10
 
 ###########################################  Checking if Import Excell is installed  ###########################################
@@ -1655,3 +1657,8 @@ Write-Output  ('File Created at ' + $Detailedlistofusers) >> $SectionLog
 ###########################################  END  ###########################################
 
 Write-Log "End of Script"
+Write-Host ('Zipping folder.... ') -ForegroundColor Magenta      
+#Zip Folder
+[io.compression.zipfile]::CreateFromDirectory($Outputlocation, ($rootdir + $date + 'AD-Report.zip')) >> $zipcatch
+Write-Host $zipcatch -ForegroundColor Red
+Write-Host ('Zip file created of reports at:... ' + $rootdir + $date + 'AD-Report.zip') -ForegroundColor Magenta      
