@@ -77,7 +77,6 @@ https://www.bvanleeuwen.nl/faq/?p=1182
   ##Forrest Skype Version
 
   DNS
-  ##DNS Zone information
   ##DNS Stats
   ##DNS Static A records
 
@@ -104,15 +103,7 @@ https://www.bvanleeuwen.nl/faq/?p=1182
   Creation Date:  2019-10-16
   Purpose/Change: Initial script development
 .ToDo
-#!ERROR: The term 'GB' is not recognized as the name of a cmdlet,
-#!on host screen split up users / computers to make it easirt to digest
-#!DHCP scope issue oddifty on stating couldnt connect when it can
-#!Bug on write-log error needs resolving in host window 
-#!Exchange domain schema level
-#!Exchange Organisation Name
-#!OU Objects Layout
-#!Azure is it connected to AD / 365 if so then connect and pull data 
-#!DNS Stale Records https://gallery.technet.microsoft.com/scriptcenter/Report-on-Stale-DNS-c6a0173b 
+
 .EXAMPLE
 Run script in host window
 #>
@@ -208,7 +199,7 @@ $builtinAdmin = Get-ADUser -Identity $BA -Server ($DCListFiltered | Select-Objec
 $DA = $domainSID.ToString() + "-512" 
 $domainAdminsNo = (Get-ADGroup -Identity $DA -Server ($DCListFiltered | Select-Object -first 1) | Get-ADGroupMember -Recursive | Measure-Object).Count
 $domainAdminsNames = Get-ADGroup -Identity $DA -Server ($DCListFiltered | Select-Object -first 1) | Get-ADGroupMember #| Select-Object Name,samaccountname | Sort-Object samaccountname
-$dnszones = Get-DnsServerZone -ComputerName ($DCListFiltered | Select-Object -first 1) -ErrorAction SilentlyContinue -WarningAction SilentlyContinue | Select-Object zonename -ErrorAction SilentlyContinue
+$dnszones = Get-DnsServerZone -ComputerName ($DCListFiltered | Select-Object -first 1) -ErrorAction SilentlyContinue -WarningAction SilentlyContinue | Select-Object zonename 
 $dhcpservers = Get-DhcpServerInDC -ErrorAction SilentlyContinue 
 $dhcpserverSelected = ($dhcpservers | Select-Object -First 1)
 #AD PAss pol
@@ -539,6 +530,7 @@ try {
     }
     #Additional UPN suffixes
     Write-Log "Additional UPN Suffix(s)"
+    write-output "Additional UPN Suffix(s)" >> $SectionLog
     if ( $UPNSuffix.Count -ne 0 ) {
         
         $UPNsuffix | Sort-Object | ForEach-Object { Write-log $_ }
@@ -666,7 +658,7 @@ write-log "Domain Admins are:..."
 Write-Output "Domain Admins are:..." >> $SectionLog
 $domainAdminsNames | ForEach-Object { write-log $_.samaccountname }
 $domainAdminsNames | ForEach-Object { $_.samaccountname } >> $SectionLog
-$domainAdminsNames | ForEach-Object { Get-ADUser $_ | Select-Object Name, department, sAMAccountName, givenName, surname, DisplayName, title, PasswordNeverExpires, PasswordLastSet, LastLogonDate, whenCreated, Description, Mail, ScriptPath, homeDirectory, homeDrive, Company, CN, distinguishedName, LockedOut, Enabled, LastBadPasswordAttempt, Country, Created, badPwdCount, CanonicalName, Manager, PasswordLastSet } | Export-Csv ($outputpath + '-AD-Domain-Admins.csv') -Append
+$domainAdminsNames | ForEach-Object { Get-ADUser $_  -Properties * | Select-Object Name, department, sAMAccountName, givenName, surname, DisplayName, title, PasswordNeverExpires, PasswordLastSet, LastLogonDate, whenCreated, Description, Mail, ScriptPath, homeDirectory, homeDrive, Company, CN, distinguishedName, LockedOut, Enabled, LastBadPasswordAttempt, Country, Created, badPwdCount, CanonicalName, Manager, PasswordLastSet } | Export-Csv ($outputpath + '-AD-Domain-Admins.csv') -Append
 write-log ('File created at: ' + ($outputpath + '-AD-Domain-Admins.csv'))
 Write-Output ('Detailed log of Admin users created at: ' + ($outputpath + '-AD-Domain-Admins.csv')) >> $SectionLog
 #Built-in Domain Administrator account details > last logon etc 
@@ -1244,16 +1236,17 @@ $SectionLog = ($outputpath + '-DNS_Report.txt')
 write-log ('Dedicated Log output to: ' + $SectionLog)
 #DNS Zone Information
 
+<# Code needs reviewing #!
 Write-log ('Exporting reports on DNS')
 Write-Output ('Exporting reports on DNS') >> $SectionLog
 foreach ($dnszone in $dnszones) {
-    Write-Log ('Exporting information on zone: ' + $dnszone.zonename)
-    Write-Output ('Exporting information on zone: ' + $dnszone.zonename) >> $SectionLog
+    Write-Log ('Collecting information on zone: ' + $dnszone.zonename)
+    Write-Output ('Collecting information on zone: ' + $dnszone.zonename) >> $SectionLog
     Export-DNSServerZoneReport -Domain $dnszone.zonename >> $logpath
     Export-DNSServerIPConfiguration -Domain $dnszone.zonename >> $logpath
     Export-DNSServerZoneReport -Domain $dnszone.zonename >> $SectionLog
     Export-DNSServerIPConfiguration -Domain $dnszone.zonename >> $SectionLog
-}
+}#>
 
 #DNS Stats
 $DNSstats = ($outputpath + '-DNS_Stats.txt')
@@ -1279,18 +1272,38 @@ $SectionLog = ($outputpath + '-DHCP_Report.txt')
 write-log ('Dedicated Log output to: ' + $SectionLog)
 write-log "Listing DHCP Servers in AD..."
 Write-Output "Listing DHCP Servers in AD..." >> $SectionLog
+$dhcpservers = Get-DhcpServerInDC
 foreach ($dhcpserver in $dhcpservers ) {
     $testDHCPServerActive = Test-Connection -ComputerName $dhcpserver -Quiet
+    if ($testDHCPServerActive -eq $true)
+    {
+    $DHCPSERVERRESPONSE = ('DHCP Server Responded to ping: ' + $dhcpserver)
+    write-log $DHCPSERVERRESPONSE 
+    write-output $DHCPSERVERRESPONSE  >> $SectionLog
+   write-log ('DHCP Server Name: ' + $dhcpserver.DNSName + ' on the IP: ' + $dhcpserver.IPAddress + ' Is Active: ' + $testDHCPServerActive)
+   Write-Output ('DHCP Server Name: ' + $dhcpserver.DNSName + ' on the IP: ' + $dhcpserver.IPAddress + ' Is Active: ' + $testDHCPServerActive) >> $SectionLog
+
+    }
+    else
+    {
+    $DHCPSERVERRESPONSE = ('DHCP Server DID NOT RESPOND to ping: ' + $dhcpserver)
     write-log ('DHCP Server Name: ' + $dhcpserver.DNSName + ' on the IP: ' + $dhcpserver.IPAddress + ' Is Active: ' + $testDHCPServerActive)
-    Write-Output ('DHCP Server Name: ' + $dhcpserver.DNSName + ' on the IP: ' + $dhcpserver.IPAddress + ' Is Active: ' + $testDHCPServerActive) >> $SectionLog
+   Write-Output ('DHCP Server Name: ' + $dhcpserver.DNSName + ' on the IP: ' + $dhcpserver.IPAddress + ' Is Active: ' + $testDHCPServerActive) >> $SectionLog
+       write-log $DHCPSERVERRESPONSE 
+    write-output $DHCPSERVERRESPONSE  >> $SectionLog
+    }
+
+  
 }
 #DHCP V4 Options
 Write-Log "Exporting DHCP v4 Options"
 Write-Output "Exporting DHCP v4 Options" >> $SectionLog
-$DHCPv4OptionsReport = ($outputpath + 'DHCPv4OptionsOutput.csv')
-Get-DhcpServerv4Scope -ComputerName $dhcpserverSelected | Get-DhcpServerv4OptionValue >> $logpath
-Get-DhcpServerv4Scope -ComputerName $dhcpserverSelected | Get-DhcpServerv4OptionValue >> $SectionLog
-Get-DhcpServerv4Scope -ComputerName $dhcpserverSelected | Get-DhcpServerv4OptionValue | Export-Csv $DHCPv4OptionsReport -Append
+$DHCPv4OptionsReport = ($outputpath + '-DHCPv4OptionsOutput.csv')
+write-log "Getting Information from $dhcpserverSelected"
+write-output "Getting Information from $dhcpserverSelected" >> $sectionlog
+Get-DhcpServerv4Scope -ComputerName $dhcpserverSelected.IPAddress | Get-DhcpServerv4OptionValue >> $logpath
+Get-DhcpServerv4Scope -ComputerName $dhcpserverSelected.IPAddress | Get-DhcpServerv4OptionValue >> $SectionLog
+Get-DhcpServerv4Scope -ComputerName $dhcpserverSelected.IPAddress | Get-DhcpServerv4OptionValue | Export-Csv $DHCPv4OptionsReport -Append
 Write-Log ('File created at: ' + $DHCPv4OptionsReport)
 Write-Output ('File created at: ' + $DHCPv4OptionsReport) >> $SectionLog
 
