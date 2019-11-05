@@ -17,6 +17,8 @@ https://www.bvanleeuwen.nl/faq/?p=1182
   Log of script running and majority of all outputs contained with in a single file
  
   AD Forrest
+  #DCDIAG
+  #REPLSUM
   ##Forest Name
   ##Forest SID
   ##Forest Distinguished SID
@@ -439,6 +441,20 @@ write-log "###########################################  AD Forrest  ############
 try {
     $SectionLog = ($outputpath + '-AD-Forrest_Report.txt')
     write-log ('Dedicated Log output to: ' + $SectionLog)
+    #DCDIAG
+    $dcdiagout = ($outputpath + '-DCDIAG.txt')
+    Write-Log ('Performing DC Diag to ' + $dcdiagout)
+    Write-Output ('Performing DC Diag to ' + $dcdiagout) >> $SectionLog
+    dcdiag >> $dcdiagout
+    dcdiag 
+
+    #REPLYSum
+    $repoutput = ($outputpath + '-REPLSUM.txt')
+    Write-Log ('Performing reply admin ' + $repoutput )
+    Write-Output ('Performing DC Diag to ' + $repoutput) >> $SectionLog
+    repadmin /replsummary >> $repoutput
+    repadmin /replsummary
+        
     #Forrest name
     Write-Log "Forrest Name: $forest"
     Write-Output "Forrest Name: $forest" >> $SectionLog
