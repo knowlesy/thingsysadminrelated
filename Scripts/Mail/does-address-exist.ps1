@@ -36,7 +36,7 @@ foreach ($mail in $content) {
         $ExcelUser = 'True'
     }
     else {
-        Write-Host ('User NOT found: ' + $Checkmailbox) -ForegroundColor Yellow
+        Write-Host ('User NOT found: ' + $mail) -ForegroundColor Yellow
         $ExcelUser = 'False'
     }
 
