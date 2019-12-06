@@ -1,0 +1,56 @@
+$paths = Get-Content "c:\temp\paths.txt"
+#$log = "c:\temp\oldfiles.log"
+$OutputPath = "C:\temp\filesfound.csv"
+$age = (Get-Date).AddYears(-6)
+foreach ($path in $paths) {
+    Get-ChildItem -Path $path -Recurse -Force -ErrorAction SilentlyContinue | Where-Object { $_.CreationTime -lt $age } | Select-Object Name,Directory,Length,CreationTime,Extension,FullName | ForEach-Object {
+        $_size = $_ | Select-Object @{Name = "Length"; Expression = { $_.Length / 1MB } }
+        $_pathlength = ($_.fullname) | Measure-Object -Character
+        $count = $_pathlength.Character;
+        if ($count -gt 255) {
+            Write-Host ('ERROR: ' + $_.fullname)  -ForegroundColor Red
+            $csvoutput = @(
+                [pscustomobject]@{
+                    Filename           = $_.name
+
+                    File_Location      = $_.Directory
+
+                    Above_Char_limit   = "Yes"
+
+                    File_Size_MB          = $_size.Length
+
+                    File_Created       = $_.CreationTime
+            
+                    File_Last_Accessed = $_.LastAccessTime
+
+                    File_Ext           = $_.Extension
+
+                })
+        
+        }
+        else {
+            Write-Host ('FOUND: ' + $_.fullname) -ForegroundColor Yellow
+            $csvoutput = @(
+                [pscustomobject]@{
+                    Filename           = $_.Name
+
+                    File_Location      = $_.FullName
+
+                    Above_Char_limit   = "No"
+
+                    File_Size_MB          = $_size.Length
+
+                    File_Created       = $_.CreationTime
+            
+                    File_Last_Accessed = $_.LastAccessTime
+
+                    File_Ext           = $_.Extension
+
+                })
+        
+        }
+    
+        $csvoutput | Export-Csv $OutputPath -Append -Force
+       
+    }
+}
