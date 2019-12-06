@@ -13,7 +13,7 @@ foreach ($path in $paths) {
         $_size = $_ | Select-Object @{Name = "Length"; Expression = { $_.Length / 1MB } }
         $count = ($_.fullname).Length
         if ($count -gt 255) {
-            Write-Host ('ERROR: Path Length' + $count + " File " + $_.Directory)  -ForegroundColor Red
+            Write-Host ('ERROR: Path Length ' + $count + " File " + $_.Directory)  -ForegroundColor Red
             $csvoutput = @(
                 [pscustomobject]@{
                     Filename           = $_.name
