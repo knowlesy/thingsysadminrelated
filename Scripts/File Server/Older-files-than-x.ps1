@@ -1,14 +1,19 @@
-$paths = Get-Content "c:\temp\paths.txt"
+#testing
+#$paths = "C:\temp\"
+#$age = (Get-Date).AddHours(-6)
 #$log = "c:\temp\oldfiles.log"
-$OutputPath = "C:\temp\filesfound.csv"
+
+#actual usage
+$paths = Get-Content "c:\temp\paths.txt"
 $age = (Get-Date).AddYears(-6)
+
+$OutputPath = "C:\temp\filesfound.csv"
 foreach ($path in $paths) {
     Get-ChildItem -Path $path -Recurse -Force -ErrorAction SilentlyContinue | Where-Object { $_.CreationTime -lt $age } | Select-Object Name,Directory,Length,CreationTime,Extension,FullName | ForEach-Object {
         $_size = $_ | Select-Object @{Name = "Length"; Expression = { $_.Length / 1MB } }
-        $_pathlength = ($_.fullname) | Measure-Object -Character
-        $count = $_pathlength.Character;
+        $count = ($_.fullname).Length
         if ($count -gt 255) {
-            Write-Host ('ERROR: ' + $_.fullname)  -ForegroundColor Red
+            Write-Host ('ERROR: Path Length' + $count + " File " + $_.Directory)  -ForegroundColor Red
             $csvoutput = @(
                 [pscustomobject]@{
                     Filename           = $_.name
@@ -16,6 +21,8 @@ foreach ($path in $paths) {
                     File_Location      = $_.Directory
 
                     Above_Char_limit   = "Yes"
+
+                    File_Path_Length = $count
 
                     File_Size_MB          = $_size.Length
 
@@ -37,6 +44,8 @@ foreach ($path in $paths) {
                     File_Location      = $_.FullName
 
                     Above_Char_limit   = "No"
+
+                    File_Path_Length = $count
 
                     File_Size_MB          = $_size.Length
 
