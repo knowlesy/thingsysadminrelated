@@ -1,0 +1,1 @@
+Get-ChildItem "C:\Temp\OLD" -Recurse -File | ForEach-Object { (($_.Group | Group-Object Extension | ForEach-Object { ("({0}){1}" -f $_.Count, $_.Name) }) -join ",")} 

@@ -1,0 +1,1 @@
+Get-Mailbox -RecipientTypeDetails SharedMailbox -ResultSize:Unlimited | select displayname,PrimarySmtpAddress,Alias,EmailAddresses,LitigationHoldEnabled,RecipientType,RetentionPolicy,SharingPolicy | Export-Csv -NoClobber -NoTypeInformation c:\temp\sharedmailboxdiscoverdoc.csv
