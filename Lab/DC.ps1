@@ -21,6 +21,7 @@ exit
 #####################################################################
 #Config Variables
 #####################################################################
+#
 $domainname = 'testlab.intra'
 $domainnetbiosname = 'testlab'
 $sethostanme = '2012-DC'
@@ -52,7 +53,7 @@ $Timezone = 'GMT Standard Time'
 function get-sysinternals
 {
  if (test-connection google.com -Quiet -Count 2)
-{ 
+{
     Write-Host Connected to outside world.......Downloading Sysinternals;
 #https://gallery.technet.microsoft.com/scriptcenter/a6b10a18-c4e4-46cc-b710-4bd7fa606f95
 (New-Object Net.WebClient).DownloadFile('https://download.sysinternals.com/files/SysinternalsSuite.zip','c:\Support\BuildFiles\SysinternalsSuite.zip');(new-object -com shell.application).namespace('c:\Support\BuildFiles').CopyHere((new-object -com shell.application).namespace('c:\Support\BuildFiles\SysinternalsSuite.zip').Items(),16)
@@ -67,41 +68,41 @@ function Set-PageFile {
     https://souladin.wordpress.com/2014/03/24/powershell-function-set-pagefile/
     .SYNOPSIS
         Sets Page File to custom size
- 
+
     .DESCRIPTION
         Disables automatic management of the pagefile, then applies the given values for path and page file size.
         Defaults to C:\pagefile.sys with a 4 gig pagefile.
- 
+
     .PARAMETER Path
         The page file's fully qualified file name (such as C:\pagefile.sys)
- 
+
     .PARAMETER InitialSize
         The page file's initial size [MB]
- 
+
     .PARAMETER MaximumSize
         The page file's maximum size [MB]
- 
+
     .EXAMPLE
         C:\PS> Set-PageFile "C:\pagefile.sys" 4096 6144
     #>
-    
+
     PARAM(
         [string]$Path = "C:\pagefile.sys",
         [int]$InitialSize = 4096,
         [int]$MaximumSize = 4096
     )
-     
+
     $ComputerSystem = $null
     $CurrentPageFile = $null
     $modify = $false
- 
+
     # Disables automatically managed page file setting first
     $ComputerSystem = Get-WmiObject -Class Win32_ComputerSystem -EnableAllPrivileges
     if ($ComputerSystem.AutomaticManagedPagefile) {
         $ComputerSystem.AutomaticManagedPagefile = $false
         $ComputerSystem.Put()
     }
- 
+
     $CurrentPageFile = Get-WmiObject -Class Win32_PageFileSetting
     if ($CurrentPageFile.Name -eq $Path) {
         # Keeps the existing page file
@@ -131,7 +132,7 @@ function Set-PageFile {
 "This script is running with elevated admin privileges"
 " "
 
-"Configuring System Settings..."	
+"Configuring System Settings..."
 # SYSTEM SETTINGS
 
     # Create Support Folder(s)
@@ -145,7 +146,7 @@ function Set-PageFile {
 
     # Set Timezone
     TZUTIL /s "$Timezone"
-    
+
     # Disable Server manager at startup
         New-ItemProperty -Path HKCU:\Software\Microsoft\ServerManager -Name DoNotOpenServerManagerAtLogon -PropertyType DWORD -Value "0x1" –Force
     # Disable DEP
@@ -163,28 +164,28 @@ function Set-PageFile {
 	    Limit-EventLog -LogName Security -MaximumSize 20MB -OverflowAction OverwriteOlder -RetentionDays 30
     # Disable UAC
         Set-ItemProperty -Path HKLM:Software\Microsoft\Windows\CurrentVersion\policies\system -Name EnableLUA  -Type DWORD -Value 0
-	
+
     # Extend Disk Timeouts
         Set-ItemProperty -Path HKLM:SYSTEM\CurrentControlSet\services\Disk -Name TimeOutValue -Value 190
 
-    # Increase Service Startup Timeouts 
+    # Increase Service Startup Timeouts
         Set-ItemProperty -Path HKLM:SYSTEM\CurrentControlSet\Control -Name ServicesPipeTimeout -Type DWord -Value 180000
 
-    # Optimize Processor Resource Scheduling 
+    # Optimize Processor Resource Scheduling
         Set-ItemProperty -Path HKLM:SYSTEM\CurrentControlSet\Control\PriorityControl -Name Win32PrioritySeparation -Value 18
 
-    # Disable TCP/IP / Large Send Offload 
+    # Disable TCP/IP / Large Send Offload
         Set-ItemProperty -Path HKLM:SYSTEM\CurrentControlSet\Services\Tcpip\Parameters -Name EnableTCPChimney -Type DWORD -Value 0
 
 "Configuring Power Settings..."
     # POWER SETTINGS
-    
+
         # Set Power plan to High performance
         powercfg.exe /SETACTIVE 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
-    
+
         # Disable the hibernate feature
         powercfg.exe /HIBERNATE off
-        
+
         # Disable Monitor Timeout
         powercfg.exe -change -monitor-timeout-ac 0
 
@@ -196,25 +197,25 @@ function Set-PageFile {
     # FAILURE SETTINGS
         # Enable Small Memory Dump
         gwmi Win32_OSRecoveryConfiguration -EnableAllPrivileges | swmi -Arguments @{DebugInfoType=1}
-        
+
         # No System Failure Auto-Restart
         gwmi Win32_OSRecoveryConfiguration -EnableAllPrivileges | swmi -Arguments @{AutoReboot=$false}
 
 "Configuring Windows Firewall..."
         # FIREWALL CONFIGURATION
-            
+
             # Set Firewall ALL profiles off
             netsh advfirewall set allprofiles state off
-            
+
             # Allow MMC Remote (in case profiles get re-enabled)
             Enable-NetFirewallRule -DisplayGroup 'Windows Remote Management'
-            
+
             # Allow ICMP Traffic
             netsh firewall set icmpsetting 8
 
 
 
-"Disabling Scheduled Tasks..."	
+"Disabling Scheduled Tasks..."
 # DISABLE SCHEDULED TASKS
             Disable-ScheduledTask -TaskName "microsoft\windows\Application Experience\AitAgent"
             Disable-ScheduledTask -TaskName "microsoft\windows\Application Experience\ProgramDataUpdater"
@@ -229,7 +230,7 @@ function Set-PageFile {
             Disable-ScheduledTask -TaskName "microsoft\windows\WDI\ResolutionHost"
             Disable-ScheduledTask -TaskName "microsoft\windows\Windows Filtering Platform\BfeOnServiceStartTypeChange"
 
-            
+
 
 "Enabling RSAT"
 Add-windowsfeature RSAT
@@ -306,7 +307,7 @@ New-ADUser -Name J.Johnston -SamAccountName J.Johnston -DisplayName 'J.Johnston'
 
 #Install DHCP
 "Installing DHCP"
-Add-WindowsFeature  -IncludeManagementTools dhcp 
+Add-WindowsFeature  -IncludeManagementTools dhcp
 netsh dhcp add securitygroups
 Restart-service dhcpserver
 Add-DhcpServerInDC  $sethostanme  $staticip
