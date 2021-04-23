@@ -13,7 +13,7 @@ function Take-Snapshot {
     )
 
 
-    $snapshotconfig = New-AzSnapshotConfig -Location 'UK South'  -AccountType StandardLRS -OsType Windows -CreateOption Empty -EncryptionSettingsEnabled $true;
+
 
 
     $name = "DC1"
@@ -24,9 +24,9 @@ function Take-Snapshot {
     #$vm.StorageProfile.OsDisk.OsType
     # $vm.StorageProfile.OsDisk.name
     $OSDisk = Get-AzDisk -DiskName $vm.StorageProfile.OsDisk.name -ResourceGroupName $vm.ResourceGroupName
-    $OSSnapshotConfig = New-AzSnapshotConfig -SourceUri $OSDisk.Id -CreateOption Copy -Location $vm.Location -CreateOption Empty
+    $OSSnapshotConfig = New-AzSnapshotConfig -SourceUri $OSDisk.Id -CreateOption Copy -Location $vm.Location
 
-    $Snapshot = New-AzSnapshot -Snapshot $snapshotConfig -SnapshotName ($date + '_OSDisk_ViaScript') -ResourceGroupName $vm.ResourceGroupName
+    $Snapshot = New-AzSnapshot -Snapshot $OSSnapshotConfig -SnapshotName ($date + '_OSDisk_ViaScript') -ResourceGroupName $vm.ResourceGroupName
 
     #datadisks
     #$vm.StorageProfile.DataDisks.name
