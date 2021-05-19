@@ -1,9 +1,0 @@
-D:\My Dropbox\Programming\Network Adapter test 1\Network Adapter test 1\obj\Debug\ResolveAssemblyReference.cache
-D:\My Dropbox\Programming\Network Adapter test 1\Network Adapter test 1\bin\Debug\Network Adapter test 1.exe
-D:\My Dropbox\Programming\Network Adapter test 1\Network Adapter test 1\bin\Debug\Network Adapter test 1.pdb
-D:\My Dropbox\Programming\Network Adapter test 1\Network Adapter test 1\bin\Debug\PacketDotNet.dll
-D:\My Dropbox\Programming\Network Adapter test 1\Network Adapter test 1\bin\Debug\SharpPcap.dll
-D:\My Dropbox\Programming\Network Adapter test 1\Network Adapter test 1\bin\Debug\SharpPcap.xml
-D:\My Dropbox\Programming\Network Adapter test 1\Network Adapter test 1\bin\Debug\PacketDotNet.xml
-D:\My Dropbox\Programming\Network Adapter test 1\Network Adapter test 1\obj\Debug\Network Adapter test 1.exe
-D:\My Dropbox\Programming\Network Adapter test 1\Network Adapter test 1\obj\Debug\Network Adapter test 1.pdb
