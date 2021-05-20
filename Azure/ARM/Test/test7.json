@@ -8,7 +8,7 @@
             "maxLength": 11
         },
         "timec": {
-            "type": "string",
+            "type": "string"
         },
         "user":{
             "type": "string"
