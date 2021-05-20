@@ -1,7 +1,7 @@
 $temp = ".\tagsexample.json"
 $who = read-host "Enter Customer"
 $who = $who.Remove(" ","")
-$sla = read-host "Enter Customer"
+$sla = read-host "Enter SLA"
 $sla = $sla.Remove(" ","")
 $date = get-date -Format yyyy-MM-dd-hh-mm
 $deployment = ($date + '_' + $who)
