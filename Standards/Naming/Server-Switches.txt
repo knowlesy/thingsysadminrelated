@@ -1,9 +1,7 @@
-CCNN-DD-WWW-NN
+CCSS-DDD-WWWNN
 
-Country Code (ISO 3166-1 alpha 2 Country Code)
-Number (Enterprises that will have 99 or more of a device in a specific location switch to hex characters)
-Device (agreed specific names in your GOPS)
-What 
-
-D can be 2+1 if W is 3
-W Can be 3+1 if D is 2
+CC = Country Code (ISO 3166-1 alpha 2 Country Code)
+SS = Number/SiteCode (Enterprises that will have 99 or more of a device in a specific location switch to hex characters)
+DD = Device (agreed specific names in your GOPS)
+WWW = The What The Service 
+NN = Number 
