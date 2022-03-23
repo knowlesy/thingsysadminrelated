@@ -1,1 +1,0 @@
-Get-DhcpServerv4Scope | Get-DhcpServerv4Lease | select * | Export-Csv c:\temp\dhcpleases.csv -NoClobber -NoTypeInformation -Append

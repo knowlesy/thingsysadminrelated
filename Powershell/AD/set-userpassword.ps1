@@ -1,1 +1,0 @@
-import-csv "c:\temp\input.csv" | foreach {Set-ADAccountPassword -Identity $_.Identity -Reset -NewPassword (ConvertTo-SecureString -AsPlainText $_.password -Force)}

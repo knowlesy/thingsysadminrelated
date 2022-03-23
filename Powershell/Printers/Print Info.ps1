@@ -1,1 +1,0 @@
-get-printer | where {$name -ne "Microsoft XPS Document Writer"} | select * | Export-Csv ('C:\Temp\' + $env:computername + '_printer.csv') -NoTypeInformation -NoClobber -Append
