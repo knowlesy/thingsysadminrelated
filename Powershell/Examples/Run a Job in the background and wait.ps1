@@ -1,5 +1,5 @@
 Start-Job -ScriptBlock { C:\support\tools\sdelete64.exe -accepteula -nobanner -z c:}
-
+Start-Sleep -Seconds 10
 $wait = Get-Process "sdelete64" -ErrorAction SilentlyContinue| select-object *
 $z = 0
 $zmax = 40 
@@ -14,7 +14,7 @@ if ($wait.Responding -eq "True")
         else {
             write-host "Zeroing C Drive ($z/$zmax)"
             start-sleep -seconds 30
-            $wait = Get-Process "sdelete64" | select-object *
+            $wait = Get-Process "sdelete64" -ErrorAction SilentlyContinue | select-object *
             $z++
         }
     }
